@@ -93,7 +93,9 @@ class User extends Authenticatable
     public function posts(){
         return $this->hasMany(Post::class,'user_id')->where('type','=',2);
     }
-
+    public function comments(){
+        return $this->hasMany(Comment::class,'user_id');
+    }
     public function post_story(){
         return $this->hasMany(Post::class,'user_id');
     }
@@ -113,12 +115,12 @@ class User extends Authenticatable
     public function savedPosts(){
         return $this->belongsToMany(Post::class,'fav_stories','user_id','story_id');
     }
-    public function groups(){
-        return $this->belongsToMany(GroupChat::class,'group_chat_members','user_id','group_id');
+    public function groups_members(){
+        return $this->belongsToMany(GroupChat::class,'group_chat_members','user_id','user_id');
     }
 
     public function mygroups(){
-        return $this->hasMany(GroupChat::class,'user_id',);
+        return $this->hasMany(GroupChat::class,'user_id');
     }
     public function blockUsers(){
         return $this->belongsToMany(User::class,'userblocks','user_id','block_user_id')

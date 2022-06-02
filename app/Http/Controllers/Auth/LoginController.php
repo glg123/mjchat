@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Helpers\JsonResponse;
+use App\Models\Admin;
 use Illuminate\Support\Facades\Auth;
 use Mail;
 use App\Models\User;
@@ -26,7 +28,10 @@ class LoginController extends Controller
     */
 
     use AuthenticatesUsers;
-
+    public function username()
+    {
+        return 'email';
+    }
     /**
      * Where to redirect users after login / registration.
      *
@@ -48,11 +53,8 @@ class LoginController extends Controller
     }
 
 
-
-    public function loginAdmin(Request $request)
+    public function loginAdminOld(Request $request)
     {
-
-
 
 
         $this->validateLogin($request);
@@ -65,6 +67,7 @@ class LoginController extends Controller
 
             return $this->sendLockoutResponse($request);
         }
+
 
         if ($this->attemptLogin($request)) {
 
@@ -79,19 +82,95 @@ class LoginController extends Controller
         return $this->sendFailedLoginResponse($request);
     }
 
+    public function loginAdmin(Request $request)
+    {
+        // TODO when facebook user doesn't have email just phone number
+
+        $rules = Validator::make($request->all(), [
+
+            'email' => 'required_if:referer,local|max:255',
+            'password' => 'required_if:referer,local|min:3',
+            //  'device_token' => 'sometimes|required',
+            //   'device_type'  => 'required',
+
+
+        ]);
+
+        if ($rules->fails()) {
+            return JsonResponse::fail($rules->errors()->first(), 400);
+        }
+
+
+        $username = $request->email;
+        $mobile = 0;
+        $old_mobile = "";
+        $username_column = 'email';
+
+
+
+
+        $request->merge([
+            $username_column => $request->email,
+            'status' => true
+        ]);
+        $credentials = $request->only($username_column, 'password', 'status');
+
+        $class = new Admin();
+
+
+        // $user = $class::where('email', 'a@a.a')->first();
+        $user = $class::where($username_column, $username)->first();
+
+
+
+        if ((!$user) || (app('hash')->check($credentials['password'], $user->password) === false)) {
+            $errors = [$this->username() => __('validation.password')];
+
+
+            return redirect()->route('loginAdmin')->withErrors($errors);
+
+        }
+
+
+        if ($user->api_token == null) {
+            $user->api_token = hash('sha512', time());
+
+        }
+        // $user->device_token = $request->get('device_token');
+        $user->save();
+        $user = Auth::guard('Admin')->loginUsingId($user->id);
+
+
+        return redirect()->intended(route('admin.dashboard.index'));
+
+        //  return response()->success("User Profile", $user);
+        //  return ['data' => $user];
+    }
+
+    protected function attemptLogin(Request $request)
+    {
+
+        return $this->guard()->attempt(
+            $this->credentials($request), $request->filled('remember')
+        );
+    }
+
+    protected function credentials(Request $request)
+    {
+        return $request->only($this->username(), 'password');
+    }
 
     protected function sendLoginResponseAdmin(Request $request)
     {
-
 
 
         $request->session()->regenerate();
 
         $this->clearLoginAttempts($request);
 
+
         return $this->authenticated($request, $this->guard()->user())
             ?: redirect()->intended($this->redirectPathAdmin());
-
 
 
     }
@@ -105,7 +184,6 @@ class LoginController extends Controller
 
         return property_exists($this, 'redirectToAdmin') ? $this->redirectToAdmin : '/admin/home';
     }
-
 
 
     /**
@@ -133,6 +211,7 @@ class LoginController extends Controller
 
     public function showLoginFormAdmin()
     {
+
         return view('auth.loginAdmin');
     }
 

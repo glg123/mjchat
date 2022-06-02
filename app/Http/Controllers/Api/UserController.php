@@ -57,7 +57,50 @@ class UserController extends Controller
         $posts = PostResource::collection($posts);
         return JsonResponse::success($posts, __('views.Done'));
     }//end otheruserProfile
+    public function HomePosts(Request $request)
+    {
+        $user = $request->user();
+        if (!$request->user()) {
+            //return JsonResponse::fail('Credentials not match', 401);
 
+            return JsonResponse::fail(__('views.not authorized'));
+
+        }
+
+        $user = User::find($user->id);
+        $block_users = $user->blockUsers()->pluck('block_user_id');
+
+        $rules = Validator::make($request->all(), [
+
+            'type' => 'required',
+        ]);
+
+        if ($rules->fails()) {
+            return JsonResponse::fail($rules->errors()->first(), 400);
+        }
+
+            if ($request->type == 1) {
+                $q = Post::distance($request->lat, $request->long);
+                $stories = $q->whereNotIn('user_id', $block_users->toArray())->orderBy('distance', 'ASC')->where('type', '=', 2)->latest()->paginate(5);
+                foreach ($stories as $key => $single) {
+                    $stories[$key]->check_id = $user->id;
+                }
+                $storyResource = PostResource::collection($stories);
+                return JsonResponse::success($storyResource, __('views.Done'));
+            }
+            else {
+                $arr = [];
+                $user = User::find($user->id);
+                $following = $user->following()->pluck('users.id');
+                $posts=Post::whereIn('user_id',$following->toArray())
+                    ->whereNotIn('user_id',$block_users->toArray())->paginate(5);
+
+                $resource = PostResource::collection($posts);
+                return JsonResponse::success($resource, __('views.Done'));
+
+            }
+
+    }
 
     public function users(Request $request)
     {

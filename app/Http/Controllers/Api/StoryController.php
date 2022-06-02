@@ -4,9 +4,18 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\JsonResponse;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\AllStoriesResource;
+use App\Http\Resources\CommentResource;
+use App\Http\Resources\GropChatMemberResource;
+use App\Http\Resources\GropChatResource;
 use App\Http\Resources\MapResource;
 use App\Http\Resources\SingleStoryResource;
 
+use App\Models\appuser;
+use App\Models\Comment;
+use App\Models\CommentLikes;
+use App\Models\GroupChat;
+use App\Models\GroupChatMember;
 use App\Models\Post;
 use App\Models\PostReport;
 use App\Models\SaveStory;
@@ -16,7 +25,7 @@ use App\Models\Storyblock;
 use App\Models\storyView;
 use App\Models\Strorylike;
 use App\Models\User;
-use App\Models\user_location;
+
 use App\Models\UserLocation;
 use App\Models\UserNotifaction;
 use Carbon\Carbon;
@@ -401,7 +410,7 @@ class StoryController extends Controller
             'story_id' => $request->story_id,
         ];
 
-       // $points = DB::table('settings')->first();
+        // $points = DB::table('settings')->first();
         $sharePrice = Setting::where('key', 'sharePrice')->first()->value_ar;
         $user = User::find($user->id);
         $user->points = $sharePrice;
@@ -452,9 +461,7 @@ class StoryController extends Controller
 
             return JsonResponse::success([], __("views.Done"));
 
-        }
-        catch (\Exception $exception)
-        {
+        } catch (\Exception $exception) {
             return JsonResponse::fail($exception->getMessage(), 400);
         }
 
@@ -499,18 +506,16 @@ class StoryController extends Controller
             sendNotfication($story->user_id, $request->story_id, __('api.Some One Like Your Post'));
 
             return JsonResponse::success([], __("views.Done"));
-        }
-        catch (\Exception $exception)
-        {
+        } catch (\Exception $exception) {
             return JsonResponse::fail($exception->getMessage(), 400);
         }
-
 
 
     }
 
 
-    public function blockStory(Request $request){
+    public function blockStory(Request $request)
+    {
 
 
         $user = $request->user();
@@ -524,7 +529,6 @@ class StoryController extends Controller
             'story_id' => 'required|exists:posts,id',
 
 
-
         ]);
 
         if ($rules->fails()) {
@@ -535,18 +539,489 @@ class StoryController extends Controller
         try {
 
             Storyblock::create([
-                'user_id'        =>      $user->id,
-                'story_id'        =>      $request->story_id,
+                'user_id' => $user->id,
+                'story_id' => $request->story_id,
                 //       'comment'        =>      $request->comment,
             ]);
             return JsonResponse::success([], __("views.Done"));
-        }
-        catch (\Exception $exception)
-        {
+        } catch (\Exception $exception) {
             return JsonResponse::fail($exception->getMessage(), 400);
         }
 
 
     }
+
+
+    public function mysavedPosts(Request $request)
+    {
+        $user = $request->user();
+        if (!$request->user()) {
+
+            return JsonResponse::fail(__('views.not authorized'));
+
+        }
+
+        $user = User::find($user->id);
+        $posts = $user->savedPosts;
+        $resource = AllStoriesResource::collection($posts);
+        return JsonResponse::success($resource, __("views.Done"));
+    }
+
 //sharePost
+
+
+    public function PostComments(Request $request, $id)
+    {
+        $user = $request->user();
+        if (!$request->user()) {
+
+            return JsonResponse::fail(__('views.not authorized'));
+
+        }
+
+        $user = User::find($user->id);
+        $comments = Comment::where('post_id', $id)->where('perant_id', '=', null)->latest()->paginate(10);
+        foreach ($comments as $key => $ab) {
+            $comments[$key]->cur_id = $user->id;
+        }
+        $resource = CommentResource::collection($comments)->response()->getData(true);;
+
+        return JsonResponse::success($resource, __("views.Done"));
+
+    }
+
+    public function sendPostComments(Request $request)
+    {
+        $user = $request->user();
+        if (!$request->user()) {
+
+            return JsonResponse::fail(__('views.not authorized'));
+
+        }
+
+        $user = User::find($user->id);
+
+
+        $rules = Validator::make($request->all(), [
+
+            'post_id' => 'required|exists:posts,id',
+            'text' => 'required',
+
+
+        ]);
+
+        if ($rules->fails()) {
+            return JsonResponse::fail($rules->errors()->first(), 400);
+        }
+
+        $post = Post::find($request->post_id);
+        $owner = User::find($post->user_id);
+
+
+        //  $current_user=appuser::find($user_id);
+        if ($owner->comment_privacy == 1) {
+            $show = 1;
+        } else if ($owner->comment_privacy == 2) {
+            $follwoing = DB::table('follow_users')->where('follower_id', '=', $owner->id)->where('follow_id', '=', $user->id)->where('status', '=', 1)->count();
+            $follwoed = DB::table('follow_users')->where('follow_id', '=', $user->id)->where('follower_id', '=', $owner->id)->where('status', '=', 1)->count();
+
+
+            if ($follwoing == 0 || $follwoed == 0) {
+                $show = 0;
+            } else {
+
+                $show = 1;
+            }
+        } else if ($owner->comment_privacy == 3) {
+            $follwoing = DB::table('follow_users')->where('follower_id', '=', $owner->id)->where('follow_id', '=', $user->id)->where('status', '=', 1)->count();
+            if ($follwoing == 0) {
+                $show = 0;
+            } else {
+                $show = 1;
+            }
+        } else {
+            $follwoed = DB::table('follow_users')
+                ->where('follow_id', '=', $owner->id)->where('follower_id', '=', $user->id)
+                ->where('status', '=', 1)->count();
+            if ($follwoed == 0) {
+                $show = 0;
+            } else {
+                $show = 1;
+            }
+        }
+
+        if ($owner->id == $user->id) {
+            $show = 1;
+        }
+        if ($show == 1) {
+            $data = $request->except('comment_id');
+            $data['user_id'] = $user->id;
+            if ($request->has('comment_id')) {
+                $data['perant_id'] = $request->comment_id;
+            }
+            Comment::create($data);
+            $story = Post::find($request->post_id);
+            UserNotifaction::create([
+                'user_id' => $story->user_id,
+                'owner_id' => $user->id,
+                'post_id' => $request->post_id,
+                'type' => 3,
+            ]);
+            // $this->sendNotfication($story->user_id, $request->post_id, __('api.Some One Comment On Your Post'));
+
+            sendNotfication($story->user_id, $request->story_id, __('api.Some One Comment On Your Post'));
+            return JsonResponse::success([], __("views.Done"));
+
+
+        } else {
+            return JsonResponse::fail('عفو لا يمكنك التعليق ', 400);
+
+
+        }
+
+
+    }
+
+
+    public function DeleteComment(Request $request, $id)
+    {
+        $user = $request->user();
+        if (!$request->user()) {
+
+            return JsonResponse::fail(__('views.not authorized'));
+
+        }
+
+        $user = User::find($user->id);
+        $findComment = $user->comments()->find($id);
+        if (!$findComment) {
+            return JsonResponse::success([], __("views.not found"));
+        }
+        $likes = CommentLikes::where('comment_id', $findComment->id)->delete();
+        Comment::destroy($id);
+        return JsonResponse::success([], __("views.Done"));
+    }
+
+
+    public function likeComment(Request $request)
+    {
+        $user = $request->user();
+        if (!$request->user()) {
+
+            return JsonResponse::fail(__('views.not authorized'));
+
+        }
+
+        $user = User::find($user->id);
+
+
+        $rules = Validator::make($request->all(), [
+
+            'comment_id' => 'required|exists:comments,id',
+            'status' => 'required',
+
+
+        ]);
+
+        if ($rules->fails()) {
+            return JsonResponse::fail($rules->errors()->first(), 400);
+        }
+
+
+        $checkLike = CommentLikes::where('user_id', $user->id)
+            ->where('comment_id', $request->get('comment_id'))->first();
+
+        if (!$checkLike) {
+            $data = $request->all();
+            $data['user_id'] = $user->id;
+            CommentLikes::create($data);
+            $commet = Comment::find($request->get('comment_id'));
+            UserNotifaction::create([
+                'user_id' => $commet->user_id,
+                'owner_id' => $user->id,
+                'post_id' => $commet->post_id,
+                'type' => 3,
+            ]);
+            sendNotfication($commet->user_id, $request->post_id, __('api.Some One Like Your Comment'));
+
+
+        }
+        if ($checkLike->status != $request->get('status')) {
+            $checkLike->status = $request->get('status');
+            $checkLike->save();
+        }
+        return JsonResponse::success([], __("views.Done"));
+
+    }//end LikeComments
+
+
+    public function mygroups(Request $request)
+    {
+        $user = $request->user();
+        if (!$request->user()) {
+
+            return JsonResponse::fail(__('views.not authorized'));
+
+        }
+
+        $user = User::find($user->id);
+
+
+        $groups = $user->mygroups();
+
+        if ($request->get('search')) {
+
+            $groups = $groups->Where('name', 'like', '%' . $request->get('search') . '%');
+        }
+
+        if ($request->get('group_id')) {
+
+            $groups = $groups->where('id', $request->get('group_id'));
+
+        }
+        $groups = $groups->get();
+        return JsonResponse::success($groups, __("views.Done"));
+
+    }
+
+
+    public function myGroupMember(Request $request)
+    {
+        $user = $request->user();
+        if (!$request->user()) {
+
+            return JsonResponse::fail(__('views.not authorized'));
+
+        }
+
+        $user = User::find($user->id);
+
+
+        $groups = $user->mygroups();
+
+        if ($request->get('search')) {
+
+            $groups = $groups->WhereHas('user', function ($query) use ($request) {
+                $query->Where('first_name', 'like', '%' . $request->get('search') . '%')
+                    ->Where('last_name', 'like', '%' . $request->get('search') . '%');
+
+            });
+
+        }
+
+        if ($request->get('group_id')) {
+
+            $groups = $groups->where('group_id', $request->get('group_id'));
+
+        }
+        $groups = $groups->get();
+
+        $groups = GropChatMemberResource::collection($groups);
+
+        return JsonResponse::success($groups, __("views.Done"));
+
+    }
+
+    public function createGroup(Request $request)
+    {
+        $user = $request->user();
+        if (!$request->user()) {
+
+            return JsonResponse::fail(__('views.not authorized'));
+
+        }
+
+        $user = User::find($user->id);
+
+
+        $rules = Validator::make($request->all(), [
+
+            'group_name' => 'required',
+            'members' => 'required',
+
+
+        ]);
+
+        if ($rules->fails()) {
+            return JsonResponse::fail($rules->errors()->first(), 400);
+        }
+
+        $group = GroupChat::create([
+            'user_id' => $user->id,
+            'name' => $request->group_name
+        ]);
+        if ($group) {
+            $memberIds = explode(',', $request->members);
+            foreach ($memberIds as $single) {
+                $checkUser = User::find($single);
+                if ($checkUser) {
+                    GroupChatMember::create([
+                        'group_id' => $group->id,
+                        'user_id' => $single,
+                    ]);
+                }
+
+            }
+
+            return JsonResponse::success(['msg' => 'Group created Successfully', 'id' => $group->id], __("views.Done"));
+
+        } else {
+            return JsonResponse::fail('Dos not created Successfully', 400);
+
+
+        }
+
+    }
+
+
+    public function removeGroupMembers(Request $request)
+    {
+        $user = $request->user();
+        if (!$request->user()) {
+
+            return JsonResponse::fail(__('views.not authorized'));
+
+        }
+
+        $user = User::find($user->id);
+
+
+        $rules = Validator::make($request->all(), [
+
+            'member_id' => 'required',
+            'group_id' => 'required',
+
+
+        ]);
+
+        if ($rules->fails()) {
+            return JsonResponse::fail($rules->errors()->first(), 400);
+        }
+
+
+        $groups = $user->mygroups()->where('id', $request->get('group_id'))->first();
+
+        $checkUser = $groups->members()->where('user_id', $request->get('member_id'))->first();
+
+        if (!$checkUser) {
+
+            return JsonResponse::fail('No Member Found', 400);
+        }
+        $checkUser->delete();
+        return JsonResponse::success([], __("views.Done"));
+
+
+    }
+
+    public function addGroupMembers(Request $request)
+    {
+
+
+        $user = $request->user();
+        if (!$request->user()) {
+
+            return JsonResponse::fail(__('views.not authorized'));
+
+        }
+
+        $user = User::find($user->id);
+
+
+        $rules = Validator::make($request->all(), [
+
+            'member_id' => 'required',
+            'group_id' => 'required',
+
+
+        ]);
+
+        if ($rules->fails()) {
+            return JsonResponse::fail($rules->errors()->first(), 400);
+        }
+        $groups = $user->mygroups()->where('id', $request->get('group_id'))->first();
+
+        $checkUser = $groups->members()->where('user_id', $request->get('member_id'))->first();
+
+        if (!$checkUser) {
+            $User = User::find($request->get('member_id'));
+
+            if (!$User) {
+
+                return JsonResponse::fail('No User Found', 400);
+            }
+
+            $member = GroupChatMember::create([
+                'user_id' => $User->id,
+                'group_id' => $groups->id,
+            ]);
+
+            return JsonResponse::success($member, __("views.Done"));
+
+
+        } elseif ($checkUser) {
+
+            return JsonResponse::fail('User Added Before', 400);
+
+        }
+
+
+    }
+
+    public function leaveGroup(Request $request)
+    {
+
+
+        $user = $request->user();
+        if (!$request->user()) {
+
+            return JsonResponse::fail(__('views.not authorized'));
+
+        }
+
+        $user = User::find($user->id);
+        $rules = Validator::make($request->all(), [
+
+            'group_id' => 'required',
+
+
+        ]);
+
+        if ($rules->fails()) {
+            return JsonResponse::fail($rules->errors()->first(), 400);
+        }
+
+
+        $groups = GroupChat::where('id', $request->get('group_id'))->first();
+
+        $checkUser = $groups->members()->where('user_id', $user->id)->first();
+
+        if (!$checkUser) {
+            return JsonResponse::fail('No User Found', 400);
+
+        } elseif ($checkUser) {
+            $checkUser->delete();
+            return JsonResponse::success([], __("views.Done"));
+
+        }
+
+        return JsonResponse::success([], __("views.Done"));
+
+    }
+
+
+    public function deleteGroup(Request $request,$id)
+    {
+        $user = $request->user();
+        if (!$request->user()) {
+
+            return JsonResponse::fail(__('views.not authorized'));
+
+        }
+
+        $user = User::find($user->id);
+        $group = $user->mygroups()->where('id', $id)->first();
+        $member = $group->groups_members()->delete();
+        $group->delete();
+        return JsonResponse::success([], __("views.Done"));
+    }
 }

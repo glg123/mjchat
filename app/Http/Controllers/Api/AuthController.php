@@ -15,6 +15,7 @@ use App\Models\follow_user;
 use App\Models\Skill;
 use App\Models\User;
 use App\Models\Userblock;
+use App\Models\UserNotifaction;
 use App\Models\UserSkill;
 use App\Models\UserWallet;
 use App\Unifonic\UnifonicMessage;
@@ -22,6 +23,7 @@ use Auth;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -81,10 +83,11 @@ class AuthController extends Controller
 
     }//end of checkPhone
 
-    public function checkUserName(Request $request){
+    public function checkUserName(Request $request)
+    {
         $rules = Validator::make($request->all(), [
 
-            'user_name'              =>         'required|unique:users,user_name',
+            'user_name' => 'required|unique:users,user_name',
 
         ]);
 
@@ -92,15 +95,16 @@ class AuthController extends Controller
             return JsonResponse::fail($rules->errors()->first(), 400);
         }
 
-            return JsonResponse::success([], __('views.available'));
+        return JsonResponse::success([], __('views.available'));
 
 
     } // end of checkUserName
 
-    public function checkEmail(Request $request){
+    public function checkEmail(Request $request)
+    {
         $rules = Validator::make($request->all(), [
 
-            'email'              =>         'required|unique:users,email',
+            'email' => 'required|unique:users,email',
 
         ]);
 
@@ -108,11 +112,10 @@ class AuthController extends Controller
             return JsonResponse::fail($rules->errors()->first(), 400);
         }
 
-            return JsonResponse::success([], __('views.available'));
+        return JsonResponse::success([], __('views.available'));
 
 
     }//end of checkEmail
-
 
 
     public function loginOld(Request $request)
@@ -122,10 +125,10 @@ class AuthController extends Controller
 
         $rules = Validator::make($request->all(), [
 
-            'username'     => 'required_if:referer,local|max:255',
-            'password'     => 'required_if:referer,local|min:3',
+            'username' => 'required_if:referer,local|max:255',
+            'password' => 'required_if:referer,local|min:3',
             'device_token' => 'sometimes|required',
-            'device_type'  => 'required',
+            'device_type' => 'required',
 
 
         ]);
@@ -142,10 +145,7 @@ class AuthController extends Controller
 
         if (filter_var($username, FILTER_VALIDATE_EMAIL)) {
             $username_column = 'email';
-        }
-
-
-        else {
+        } else {
 
             $username_column = 'mobile';
 
@@ -176,7 +176,7 @@ class AuthController extends Controller
 
         $request->merge([
             $username_column => $request->username,
-            'status'         => '0'
+            'status' => '0'
         ]);
         $credentials = $request->only($username_column, 'password', 'status');
 
@@ -196,18 +196,17 @@ class AuthController extends Controller
         }
 
 
-        if( $user->api_token==null)
-        {
-           // $user->api_token = hash('sha512', time());
+        if ($user->api_token == null) {
+            // $user->api_token = hash('sha512', time());
             $user->api_token = $user->createToken('api_token')->plainTextToken;
 
         }
 
-        if ($user->status==2){
+        if ($user->status == 2) {
             return JsonResponse::fail(__('views.UserBlock'), 400);
 
         }
-        if ($user->status==0){
+        if ($user->status == 0) {
             return JsonResponse::fail(__('views.UserMustActivated'), 400);
 
         }
@@ -217,9 +216,10 @@ class AuthController extends Controller
         $user->save();
 
 
-        return JsonResponse::success($user,"User Profile");
+        return JsonResponse::success($user, "User Profile");
         //  return ['data' => $user];
     }
+
     public function login(Request $request)
     {
         // TODO when facebook user doesn't have email just phone number
@@ -227,10 +227,10 @@ class AuthController extends Controller
 
         $rules = Validator::make($request->all(), [
 
-            'username'     => 'required_if:referer,local|max:255',
-            'password'     => 'required_if:referer,local|min:3',
+            'username' => 'required_if:referer,local|max:255',
+            'password' => 'required_if:referer,local|min:3',
             'device_token' => 'sometimes|required',
-            'device_type'  => 'required',
+            'device_type' => 'required',
 
 
         ]);
@@ -247,10 +247,7 @@ class AuthController extends Controller
 
         if (filter_var($username, FILTER_VALIDATE_EMAIL)) {
             $username_column = 'email';
-        }
-
-
-        else {
+        } else {
 
             $username_column = 'mobile';
 
@@ -281,7 +278,7 @@ class AuthController extends Controller
 
         $request->merge([
             $username_column => $request->username,
-            'status'         => '0'
+            'status' => '0'
         ]);
         $credentials = $request->only($username_column, 'password', 'status');
 
@@ -301,18 +298,17 @@ class AuthController extends Controller
         }
 
 
-        if( $user->api_token==null)
-        {
+        if ($user->api_token == null) {
             // $user->api_token = hash('sha512', time());
             $user->api_token = $user->createToken('api_token')->plainTextToken;
 
         }
 
-        if ($user->status==2){
+        if ($user->status == 2) {
             return JsonResponse::fail(__('views.UserBlock'), 400);
 
         }
-        if ($user->status==0){
+        if ($user->status == 0) {
             return JsonResponse::fail(__('views.UserMustActivated'), 400);
 
         }
@@ -322,9 +318,10 @@ class AuthController extends Controller
         $user->save();
 
 
-        return JsonResponse::success($user,"User Profile");
+        return JsonResponse::success($user, "User Profile");
         //  return ['data' => $user];
     }
+
     public function store(Request $request)
     {
 
@@ -349,7 +346,7 @@ class AuthController extends Controller
         if ($rules->fails()) {
             return JsonResponse::fail($rules->errors()->first(), 400);
         }
-        $mobile='';
+        $mobile = '';
         if ($request->get('mobile')) {
             if (startsWith($request->get('mobile'), '0')) {
                 $mobile = substr($request->get('mobile'), 1, strlen($request->get('mobile')));
@@ -401,7 +398,7 @@ class AuthController extends Controller
             ]));
 
             $token = $user->createToken('api_token')->plainTextToken;
-            $user->api_token=$token;
+            $user->api_token = $token;
             $user->save();
 
             try {
@@ -413,8 +410,7 @@ class AuthController extends Controller
 
             }
 
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
 
             return JsonResponse::fail($e->getMessage(), 400);
 
@@ -423,7 +419,6 @@ class AuthController extends Controller
 
 
     }
-
 
 
     public function verifyNew(Request $request)
@@ -443,7 +438,7 @@ class AuthController extends Controller
             return JsonResponse::fail($rules->errors()->first(), 400);
         }
 
-        $mobile='';
+        $mobile = '';
         if ($request->get('mobile')) {
             if (startsWith($request->get('mobile'), '0')) {
                 $mobile = substr($request->get('mobile'), 1, strlen($request->get('mobile')));
@@ -459,7 +454,6 @@ class AuthController extends Controller
             $user = User::whereMobile($mobile)
                 ->whereConfirmationCode($request->get('code'))
                 ->first();
-
 
 
             if (!$user) {
@@ -522,7 +516,7 @@ class AuthController extends Controller
 
 
         try {
-            $mobile='';
+            $mobile = '';
             if ($request->get('mobile')) {
                 if (startsWith($request->get('mobile'), '0')) {
                     $mobile = substr($request->get('mobile'), 1, strlen($request->get('mobile')));
@@ -685,7 +679,7 @@ class AuthController extends Controller
             'last_name' => 'sometimes|required',
             'gender' => 'sometimes|required|string',
             'date_of_birth' => 'sometimes|required|date|before:2003-01-01',
-           // 'user_name' => 'sometimes|required|unique:users,user_name',
+            // 'user_name' => 'sometimes|required|unique:users,user_name',
             'user_name' => ['required', 'string', 'max:255', 'unique:users',
                 'regex:/^[A-Za-z0-9]+(?:[ _-][A-Za-z0-9]+)*$/'],
         ]);
@@ -712,7 +706,7 @@ class AuthController extends Controller
                 'gender',
                 'date_of_birth',
                 'user_name',
-
+                'comment_privacy',
 
 
             ]));
@@ -1021,8 +1015,8 @@ class AuthController extends Controller
     }
 
 
-
-    public function myStoires(Request $request){
+    public function myStoires(Request $request)
+    {
 
         $user = $request->user();
         if (!$request->user()) {
@@ -1033,15 +1027,16 @@ class AuthController extends Controller
         }
 
 
-        $user=User::find($user->id);
-        $posts=$user->stories()->latest()->paginate(5);
-        $posts=PostResource::collection($posts);
+        $user = User::find($user->id);
+        $posts = $user->stories()->latest()->paginate(5);
+        $posts = PostResource::collection($posts);
         return JsonResponse::success($posts, __('views.Done'));
 
 
     }
 
-    public function myPosts(Request $request){
+    public function myPosts(Request $request)
+    {
 
         $user = $request->user();
         if (!$request->user()) {
@@ -1052,9 +1047,9 @@ class AuthController extends Controller
         }
 
 
-        $user=User::find($user->id);
-        $posts=$user->posts()->latest()->paginate(5);
-        $posts=PostResource::collection($posts);
+        $user = User::find($user->id);
+        $posts = $user->posts()->latest()->paginate(5);
+        $posts = PostResource::collection($posts);
         return JsonResponse::success($posts, __('views.Done'));
 
 
@@ -1073,7 +1068,6 @@ class AuthController extends Controller
         $rules = Validator::make($request->all(), [
 
             'block_user_id' => 'required|exists:users,id',
-
 
 
         ]);
@@ -1099,8 +1093,7 @@ class AuthController extends Controller
                     }
 
                     return JsonResponse::success([], __('views.Done'));
-                }
-                else {
+                } else {
                     Userblock::create([
                         'user_id' => $user->id,
                         'block_user_id' => $request->get('block_user_id'),
@@ -1122,12 +1115,9 @@ class AuthController extends Controller
             }
 
             return JsonResponse::fail('You Cant Block Yourself', 400);
-        }
-        catch (\Exception $exception)
-        {
+        } catch (\Exception $exception) {
             return JsonResponse::fail($exception->getMessage(), 400);
         }
-
 
 
     }
@@ -1144,7 +1134,6 @@ class AuthController extends Controller
         $rules = Validator::make($request->all(), [
 
             'block_user_id' => 'required|exists:users,id',
-
 
 
         ]);
@@ -1170,11 +1159,10 @@ class AuthController extends Controller
                     }
 
                     return JsonResponse::success([], __('views.Done'));
-                }
-                else {
+                } else {
                     Userblock::create([
                         'user_id' => $user->id,
-                        'status' =>'0',
+                        'status' => '0',
                         'block_user_id' => $request->get('block_user_id'),
 
                         //       'comment'        =>      $request->comment,
@@ -1194,12 +1182,9 @@ class AuthController extends Controller
             }
 
             return JsonResponse::fail('You Cant Block Yourself', 400);
-        }
-        catch (\Exception $exception)
-        {
+        } catch (\Exception $exception) {
             return JsonResponse::fail($exception->getMessage(), 400);
         }
-
 
 
     }
@@ -1231,9 +1216,9 @@ class AuthController extends Controller
 
         }
 
-        $user=User::find($user->id);
-        $followers=$user->flowers()->paginate(5);
-        $resource=appuserabdResponse::collection($followers);
+        $user = User::find($user->id);
+        $followers = $user->flowers()->paginate(5);
+        $resource = appuserabdResponse::collection($followers);
         return JsonResponse::success($resource, __('views.Done'));
     }
 
@@ -1246,11 +1231,12 @@ class AuthController extends Controller
 
         }
 
-        $user=User::find($user->id);
-        $followers=$user->following()->paginate(5);
-        $resource=appuserabdResponse::collection($followers);
+        $user = User::find($user->id);
+        $followers = $user->following()->paginate(5);
+        $resource = appuserabdResponse::collection($followers);
         return JsonResponse::success($resource, __('views.Done'));
     }
+
     public function followuser(Request $request)
     {
         $user = $request->user();
@@ -1259,15 +1245,14 @@ class AuthController extends Controller
             return JsonResponse::fail(__('views.not authorized'));
 
         }
-        $user=User::find($user->id);
+        $user = User::find($user->id);
         $block_users = $user->blockUsers()->pluck('block_user_id');
 
 
         $rules = Validator::make($request->all(), [
 
-            'user_id' => 'required|exists:appusers,id',
+            'user_id' => 'required|exists:users,id',
             'status' => 'required',
-
 
 
         ]);
@@ -1278,56 +1263,45 @@ class AuthController extends Controller
 
 
         if (in_array($request->get('user_id'), $block_users->toArray())) {
-            return $this->returnError('', 'You Cant Follow Blocked User,Un Block Him To Follow');
+            return JsonResponse::fail('You Cant Follow Blocked User,Un Block Him To Follow', 400);
+
 
         }
 
 
+        if ($request->status == 1) {
+            $data = ['follower_id' => $user->id, 'follow_id' => $request->user_id];
+            follow_user::updateOrCreate($data, ['status' => 1]);
+            UserNotifaction::create([
+                'user_id' => $request->user_id,
+                'owner_id' => $user->id,
+                'type' => 1,
+            ]);
 
 
-            if ($request->status == 1) {
-                $data = ['follower_id' => $user->id, 'follow_id' => $request->user_id];
-                follow_user::updateOrCreate($data, ['status' => 1]);
-                UserNotifaction::create([
-                    'user_id' => $request->user_id,
-                    'owner_id' => $user_id,
-                    'type' => 1,
-                ]);
+            // send_push_to_topic('MJTopic', 'test', 'test', '0');
+            //     dd($client->device_token);*/
+            $client = User::find($request->user_id);
+            if ($client) {
+                sendNotfication($request->user_id, 0, __('api.Some One Follow You'));
 
-                /*
-                                $push_data = [
-                                    'title' => __('views.You Have New Employee #') . $request->user_id,
-                                    'body' => __('views.You Have New Employee #') . $request->user_id,
-                                    'id' => $user_id,
-                                    'user_id' => $request->user_id,
-                                    'type' => 'add',
-                                ];
-
-
-                                $client=fcm_token::where('user_id',$user_id)->first();
-
-                                if($client)
-                                {
-                                    send_push('ewX46eCUhUE8jrJvFZybRr:APA91bH7fF7cN_ZtC7N1p45h1tXdEV700vwmhbztK1F81xnibmQAyqjM29e5XcM1n06UEiANlH79LbjTpKnMU0niSzjJSSZAWDZBxtQ1GZdgvqg6dOaaIJkJFKQbETujv9MioTkPwXt-', $push_data, 'ios');
-                                }
-                               // send_push_to_topic('MJTopic', 'test', 'test', '0');
-                           //     dd($client->device_token);*/
-                $this->sendNotfication($request->user_id, 0, __('api.Some One Follow You'));
-                return $this->returnSuccessMessage('done successfully');
             }
-            else {
-                DB::table('follow_users')->where('follow_id', $request->user_id)->where('follower_id', $user_id)->delete();
-                return $this->returnSuccessMessage('done successfully');
-            }
+            return JsonResponse::success([], __('views.Done'));
+        } else {
+            DB::table('follow_users')->where('follow_id', $request->user_id)->where('follower_id', $user->id)->delete();
+            return JsonResponse::success([], __('views.Done'));
+        }
 
     }//end followuser
+
     public function myVideos(Request $request)
     {
-        $user_id=$this->getUserID($request->bearerToken());
-        $user=appuser::find($user_id);
-        $followers=$user->myVideos()->paginate(5);
-        $resource=appuserabdResponse::collection($followers);
-        return  $this->returnData('posts',$resource);
+        $user_id = $this->getUserID($request->bearerToken());
+        $user = appuser::find($user_id);
+        $followers = $user->myVideos()->paginate(5);
+        $resource = appuserabdResponse::collection($followers);
+        return $this->returnData('posts', $resource);
     }
+
 
 }

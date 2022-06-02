@@ -110,18 +110,7 @@
                                                     </div>
                                                 </div>
 
-                                                <div class="form-group row">
-                                                    <label class="col-xl-3 col-lg-3 col-form-label">{{__('تفعيل روابط الدفع')}}</label>
-                                                    <div class="col-lg-9 col-xl-6">
-                                                        <div class="input-group validated">
-                                                            <select class="form-control" name="active_payment_link">
-                                                                <option {{$admin->active_payment_link == 0 ? 'selected' : ''}} value="0">{{__('مفعل')}}</option>
-                                                                <option {{$admin->active_payment_link == 1 ? 'selected' : ''}} value="1">{{__('غير مفعل')}}</option>
-                                                            </select>
-                                                            <div class="invalid-feedback">{{$errors->first('active_payment_link')}}</div>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                              
 
 
                                         </div>

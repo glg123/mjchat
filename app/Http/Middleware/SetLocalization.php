@@ -41,7 +41,9 @@ class SetLocalization
         App::setLocale($locale);
 
         if (!in_array($request->segment(1), $locales)) {
-            $request_uri = $this->getRedirectPath($request) . '/' .$locale;
+            $request_uri = $locale.'/'.$this->getRedirectPath($request) ;
+
+          //  dd($request_uri);
             return redirect($request_uri)->withCookie(cookie()->forever('locale', $locale));
         }
 

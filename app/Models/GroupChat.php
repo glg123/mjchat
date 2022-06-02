@@ -20,4 +20,7 @@ class GroupChat extends Model
     public function onwer(){
         return $this->hasOne(User::class,'id','user_id');
     }
+    public function groups_members(){
+        return $this->belongsToMany(User::class,'group_chat_members','user_id','group_id');
+    }
 }

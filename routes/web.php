@@ -74,8 +74,27 @@ Route::group(['middleware' => 'SetLocalizationFrontend'], function () {
             Route::get('/dashboard/lang/{lang}', 'Admin\SettingController@lang')->name('admin.dashboard.lang'); // new
 
 
-            Route::get('/edit', 'Admin\SettingController@edit')->name('admin.settings.edit');
-            Route::post('/edit', 'Admin\SettingController@update')->name('admin.settings.update');
+            Route::get('/edit/my/profile', 'Admin\SettingController@editMyProfile')->name('admin.edit');
+            Route::post('/edit', 'Admin\SettingController@updateMyProfile')->name('admin.update');
+
+
+            Route::get('/settings', 'Admin\SettingController@editSettings')->name('admin.settings.edit');
+            Route::post('/settings', 'Admin\SettingController@updateSettings')->name('admin.settings.update');
+
+            Route::get('/users', 'Admin\UserController@users')->name('admin.users.index');
+            Route::get('/user/{id}/show', 'Admin\UserController@edit')->name('admin.users.show');
+            Route::get('/user/{id}/update', 'Admin\UserController@update')->name('admin.users.update');
+            Route::post('/users/datatable', 'Admin\UserController@datatable')->name('admin.users.datatable');
+
+
+
+
+            Route::get('/adds', 'Admin\SettingController@adds')->name('admin.adds.index');
+            Route::get('/adds/create', 'Admin\SettingController@createAdds')->name('admin.adds.create');
+            Route::post('/adds', 'Admin\SettingController@addsStore')->name('admin.adds.store');
+            Route::get('/add/{id}/edit', 'Admin\SettingController@edit')->name('admin.adds.edit');
+            Route::get('/add/{id}/update', 'Admin\SettingController@Addupdate')->name('admin.adds.update');
+            Route::post('/adds/datatable', 'Admin\SettingController@Addsdatatable')->name('admin.adds.datatable');
 
 
             Route::post('/logout', 'Auth\LoginController@logout')->name('admin.logout'); // TODO

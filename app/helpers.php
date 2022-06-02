@@ -194,12 +194,13 @@ function process_datatable_query($query, $search_callback = null, $post_query = 
 
 function get_admin_menu_list()
 {
+
     return $menu_list = [
         [
             'url' => route('admin.dashboard.index'),
             'icon' => 'flaticon2-analytics',
             'text' => __('views.Home'),
-            'is_active' => starts_with(
+            'is_active' => str_contains(
                 request()
                     ->route()
                     ->getName(),
@@ -207,8 +208,39 @@ function get_admin_menu_list()
             ),
             'children' => [],
         ],
+        [
 
+            'url' => route('admin.settings.edit'),
+            'icon' => 'flaticon2-analytics',
+            'text' => __('views.Settings'),
+            'is_active' => str_contains(
+                request()->route()->getName(),
+                'admin.settings.edit'
+            ),
+            'children' => [],
+        ],
+        [
 
+            'url' => route('admin.users.index'),
+            'icon' => 'flaticon2-user',
+            'text' => __('views.Users'),
+            'is_active' => str_contains(
+                request()->route()->getName(),
+                'admin.users.index'
+            ),
+            'children' => [],
+        ],
+        [
+
+            'url' => route('admin.adds.index'),
+            'icon' => 'flaticon2-user',
+            'text' => __('views.adds'),
+            'is_active' => str_contains(
+                request()->route()->getName(),
+                'admin.adds.index'
+            ),
+            'children' => [],
+        ],
     ];
 }
 

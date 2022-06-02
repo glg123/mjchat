@@ -3,7 +3,7 @@
     $lang_route = 'admin.dashboard.lang';
     $dashboard_index = route('admin.dashboard.index');
     $logout_url = route('admin.logout');
-    $edit_current_user_url = route('admin.settings.edit');
+    $edit_current_user_url = route('admin.edit');
 
 ?>
 <!DOCTYPE html>
@@ -16,7 +16,7 @@
     <head>
         <base href="/">
         <meta charset="utf-8" />
-        <title>الصندوق العقاري</title>
+        <title>لوحة تحكم التطبيق</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta name="csrf-token" content="{{csrf_token()}}">
@@ -181,9 +181,9 @@
                                     <span class="kt-header__topbar-icon">
                                         <span class="kt-badge kt-badge--username kt-badge--unified-success kt-badge--lg kt-badge--rounded kt-badge--bold">
                                         @if(app()->getLocale() === "en")
-                                          {{__('views.English_swicher')}}
+                                         ENG
                                         @else
-                                          {{__('views.Arabic_swicher')}}
+                                          العربية
                                         @endif
                                     </span>
                                 </div>
@@ -194,11 +194,11 @@
                                         $lang_list = [
                                             'ar' => [
                                                 'code' => 'ar',
-                                                'text' => __('views.Arabic_swicher'),
+                                                'text' => 'العربية',
                                             ],
                                             'en' => [
                                                 'code' => 'en',
-                                                'text' => __('views.English_swicher'),
+                                                'text' => 'En',
                                             ],
                                         ];
                                         ?>
@@ -219,7 +219,7 @@
                             <div class="kt-header__topbar-item kt-header__topbar-item--user">
                                 <div class="kt-header__topbar-wrapper" data-toggle="dropdown" data-offset="0px,0px">
                                     <div class="kt-header__topbar-user">
-                                        <span class="kt-header__topbar-welcome kt-hidden-mobile">{{__('views.Hi,')}}</span>
+                                        <span class="kt-header__topbar-welcome kt-hidden-mobile">{{__('views.Hi')}}</span>
                                         <span class="kt-header__topbar-username kt-hidden-mobile">{{auth()->guard('Admin')->user()->name}}</span>
                                         <span class="kt-badge kt-badge--username kt-badge--unified-success kt-badge--lg kt-badge--rounded kt-badge--bold">{{mb_substr(auth()->guard('Admin')->user()->name, 0, 1)}}</span>
                                     </div>
@@ -342,7 +342,7 @@
                                     </div>
                                     @endif
                                     @else
-                                    <h3 class="kt-subheader__title">{{__('views.Dashboard')}}</h3>
+                                    <h3 class="kt-subheader__title">{{trans('views.Dashboard')}}</h3>
                                     <span class="kt-subheader__separator kt-hidden"></span>
                                     <div class="kt-subheader__breadcrumbs">
                                         <a href="javascript:;" class="kt-subheader__breadcrumbs-home"><i class="flaticon2-shelter"></i></a>

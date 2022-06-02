@@ -51,5 +51,7 @@ class Post extends Model
         return \Storage::disk('posts')->url('');
 
     }
-
+    public function comments(){
+        return $this->hasMany(Comment::class,'post_id');
+    }
 }
