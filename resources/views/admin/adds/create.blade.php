@@ -1,7 +1,35 @@
 @extends('admin.layout.app')
 @push('css')
 
+    <script type="text/javascript"
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDLsm2Z-ym0-0KWwYGBU2JZYYp47Qaa5uM&sensor=false&libraries=places"></script>
+    <style type="text/css">
+        .input-controls {
+            margin-top: 10px;
+            border: 1px solid transparent;
+            border-radius: 2px 0 0 2px;
+            box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            height: 32px;
+            outline: none;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
 
+        #searchInput {
+            background-color: #fff;
+            font-family: Roboto;
+            font-size: 15px;
+            font-weight: 300;
+            margin-left: 12px;
+            padding: 0 11px 0 13px;
+            text-overflow: ellipsis;
+            width: 50%;
+        }
+
+        #searchInput:focus {
+            border-color: #4d90fe;
+        }
+    </style>
 @endpush
 @section('content')
     <!-- begin:: Content -->
