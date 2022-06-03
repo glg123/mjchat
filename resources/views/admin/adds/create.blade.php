@@ -122,5 +122,6 @@
 
 
 @push('scripts')
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAtdvEJAz8r2k5V6Q618BosZla0iGrdMqU&sensor=false"></script>
 
 @endpush
