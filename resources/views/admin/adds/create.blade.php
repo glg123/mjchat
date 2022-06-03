@@ -95,8 +95,8 @@
                                                                 <div class="map" id="map" style="width: 100%; height: 300px;"></div>
                                                                 <div class="form_area">
                                                                     <input type="text" disabled value="" name="address" id="location">
-                                                                    <input type="text" value="" name="latitude" id="lat">
-                                                                    <input type="text" value="" name="longitude" id="lng">
+                                                                    <input type="text" value="" name="lat" id="lat">
+                                                                    <input type="text" value="" name="long" id="lng">
                                                                 </div>
 
                                                             </fieldset>
@@ -157,7 +157,6 @@
 
 
 @push('scripts')
-    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAtdvEJAz8r2k5V6Q618BosZla0iGrdMqU&sensor=false"></script>
 <script>
     function initialize() {
         var latlng = new google.maps.LatLng('26', '43');

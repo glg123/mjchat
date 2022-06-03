@@ -15,4 +15,17 @@ class add extends Model
     const LONGITUDE = 'long';
     protected static $kilometers = true;
 
+
+    public function getImgAttribute($value)
+    {
+
+        if ($value) {
+
+
+            return \Storage::disk('adds')->url($value);
+        }
+        return \Storage::disk('adds')->url('');
+
+    }
+
 }

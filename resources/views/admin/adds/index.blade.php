@@ -137,7 +137,7 @@
                     sortable: false,
                     width: 100,
                     template: function (row, index, datatable) {
-                        return '<img src="'+ row.img +'" /></img>';
+                        return '<img width="80" src="'+ row.img +'" /></img>';
                     },
                 },
                 {
@@ -146,8 +146,8 @@
                     sortable: false,
                     width: 100,
                     template: function (row, index, datatable) {
-                        return '<span ><i class="far fa-share-alt mr-1"></i>\n' + row.url +
-                            '                </span>';
+                        return '<a href="' + row.url +'" ><i class="far fa-share-alt mr-1"></i>\n' + row.url +
+                            '                </a>';
                     },
                 },
                 {
@@ -216,7 +216,7 @@
                     <li class="kt-nav__item">\
                       <a href="' + edit_url + '" class="kt-nav__link">\
                         <i class="kt-nav__link-icon flaticon2-contract"></i>\
-                        <span class="kt-nav__link-text">{{__('تفاصيل')}}</span>\
+                        <span class="kt-nav__link-text">{{__('views.edit')}}</span>\
                       </a>\
                     </li>\
                   </ul>\

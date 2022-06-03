@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Intervention\Image\Facades\Image;
 
 
 class SettingController extends Controller
@@ -276,10 +277,6 @@ class SettingController extends Controller
     } //<--- End Method
 
 
-
-
-
-
     public function adds()
     {
         $index_url = route('admin.adds.datatable');
@@ -290,8 +287,8 @@ class SettingController extends Controller
         $object = new add();
 
         $html_breadcrumbs = [
-            'title'     => __('views.adds'),
-            'subtitle'  => __('views.Index'),
+            'title' => __('views.adds'),
+            'subtitle' => __('views.Index'),
             'datatable' => true,
         ];
 
@@ -312,15 +309,15 @@ class SettingController extends Controller
     }
 
 
-    public function createAdds()
+    public function createAdds(Request $request)
     {
 
         // dd($categories->toArray());
         $index_url = route('admin.adds.index');
-        $create_url = route('admin.adds.create');
+        $create_url = route('admin.adds.store');
 
         $html_breadcrumbs = [
-            'title'    => __('views.adds'),
+            'title' => __('views.adds'),
             'subtitle' => __('views.Add'),
         ];
 
@@ -329,6 +326,64 @@ class SettingController extends Controller
             compact('html_breadcrumbs', 'index_url', 'create_url')
         );
     }
+
+    public function addsStore(Request $request)
+    {
+
+
+        // dd($request->all());
+
+
+        $rules = [
+            'img' => 'required',
+            'url' => 'required',
+            'lat' => 'required',
+            'long' => 'required',
+            'type' => 'required',
+            //  'plan'               => 'required',
+
+        ];
+
+        $this->validate($request, $rules);
+
+
+        $add = add::create([
+            'img' => 'required',
+            'url' => $request->get('url'),
+            'lat' => $request->get('lat'),
+            'long' => $request->get('long'),
+            'type' => $request->get('type'),
+        ]);
+
+        if (($request->hasFile('img'))) {
+//////
+
+            $destinationPath = public_path('uploads/add/');
+            $xy = $request->file('img');
+            $unix_timestamp = date('m/d/Y h:i:s a', time());
+            //return $xy;
+
+
+            $extension = strtolower($xy->getClientOriginalExtension());
+            //return $extension;
+            if (in_array($extension, $this->image_extensions())) {
+
+                $path = $request->file('img')->store('public/adds/photo');
+                $path = str_replace('public', 'storage', $path);
+
+                $add->img = $path;
+                $add->save();
+
+
+            }
+
+
+        }
+        \Session::flash('success', trans('تم ارسال بيانات الدفع بنجاح'));
+
+        return redirect()->route('admin.adds.index');
+    }
+
 
     public function Addsdatatable(Request $request)
     {
@@ -342,8 +397,7 @@ class SettingController extends Controller
         if ($request->get('type')) {
 
 
-            $adds = $adds->where('type','=',$request->get('type') );
-
+            $adds = $adds->where('type', '=', $request->get('type'));
 
 
         }
@@ -361,7 +415,6 @@ class SettingController extends Controller
                         ->orWhere('long', 'like', '%' . $search . '%');
 
 
-
                 });
 
 
@@ -371,194 +424,83 @@ class SettingController extends Controller
 
     public function edit($id)
     {
-        $user = User::find($id);
+        $add = add::find($id);
 
         // dd($categories->toArray());
-        $index_url = route('admin.users.index');
-        $update_url = route('admin.users.update', $id);
+        $index_url = route('admin.adds.index');
+        $update_url = route('admin.adds.update', $id);
 
         $html_breadcrumbs = [
-            'title'    => __('views.users'),
+            'title' => __('views.adds'),
             'subtitle' => __('views.Edit'),
         ];
 
         return view(
-            'admin.users.edit',
-            compact('html_breadcrumbs', 'index_url', 'update_url', 'user')
+            'admin.adds.edit',
+            compact('html_breadcrumbs', 'index_url', 'update_url', 'add')
         );
     }
 
-    public function update(Request $request, $id)
+    public function Addupdate(Request $request, $id)
     {
 
-
-        // dd($request->all());
-        $requestPayment = UserPayment::with('user')->find($id);
-
-
-        $user = User::where('unique_code', $requestPayment->user->unique_code)->first();
-
-
-        if (!isset($requestPayment)) {
-            return redirect()->route('admin.payment_requests.index');
-        }
-
-
         $rules = [
-            'payment_method_id' => 'required',
+            'img' => 'required',
+            'url' => 'required',
+            'lat' => 'required',
+            'long' => 'required',
+            'type' => 'required',
             //  'plan'               => 'required',
 
         ];
 
         $this->validate($request, $rules);
-        $plan = \App\Models\Plan::find($id);
 
 
-        if (!$user) {
-            \Session::flash('success', trans('المستخدم لم يقدم طلب دفع'));
-
+        $add = add::find($id);
+        if(!$add)
+        {
+            \Session::flash('error', trans('العنصر غير موجود'));
         }
 
+        $add->update($request->only([
 
-        if ($request->get('payment_method_id') == 2) {
-            if ($plan) {
-                $paymentCheck = UserPlan::where('unique_code', $requestPayment->user->unique_code)->first();
-
-                if (!$paymentCheck) {
-                    $user_plan = UserPlan::create([
-                        'plan_id'        => $plan->id,
-                        'user_id'        => $user->id,
-                        'status'         => '0',
-                        'unique_code'    => $requestPayment->user->unique_code,
-                        'payment_method' => $request->get('payment_method_id'),
-                        'payment_url'    => null,
-                        'count_try'      => 0,
-                        'total'          => $plan->price
-                    ]);
-                }
+            'url' ,
+            'lat',
+            'long' ,
+            'type' ,
 
 
-                $text = 'شكرا لإشتراكك معنا ونرحب بإنضمامك لعائلة عقارز';
-                $message = 'http://aqarz.sa/plans/' . $user->unique_code;
-                ini_set("smtp_port", "465");
-                $banks = Bank::where('status', '1')->get();
-                $userDet = UserPlan::with('user','plan')->where('unique_code', $requestPayment->user->unique_code)->first();
+        ]));
+        $add = add::find($id);
+        if (($request->hasFile('img'))) {
+//////
+
+            $destinationPath = public_path('uploads/add/');
+            $xy = $request->file('img');
+            $unix_timestamp = date('m/d/Y h:i:s a', time());
+            //return $xy;
 
 
+            $extension = strtolower($xy->getClientOriginalExtension());
+            //return $extension;
+            if (in_array($extension, $this->image_extensions())) {
 
-                $to = $user->email;
+                $path = $request->file('img')->store('public/adds/photo');
+                $path = str_replace('public', 'storage', $path);
 
+                $add->img = $path;
+                $add->save();
 
-                $from = 'info@aqarz.sa';
-                $name = 'Aqarz';
-                $subject = 'شكرا لإشتراكك معنا';
-
-
-                $logo = asset('logo.svg');
-                $link = '#';
-
-                $details = [
-                    'to'       => $to,
-                    'from'     => $from,
-                    'logo'     => $logo,
-                    'link'     => $link,
-                    'subject'  => $subject,
-                    'name'     => $name,
-                    "message"  => $message,
-                    "text_msg" => $text,
-                    'banks'    => $banks,
-                    'userDet'     => $userDet->user,
-                    'planDet'     =>  $userDet->plan,
-                ];
-
-
-                // var_export (dns_get_record ( "host.name.tld") );
-
-                // dd(444);
-                \Mail::to($to)->send(new \App\Mail\NewBankMail($details));
-
-                /* if (Mail::failures()) {
-                     return response()->json([
-                         'status'  => false,
-                         'data'    => $details,
-                         'message' => 'Nnot sending mail.. retry again...'
-                     ]);
-                 }*/
-
-
-                $user_mobile = checkIfMobileStartCode($user->mobile, $user->country_code);
-                $unifonicMessage = new UnifonicMessage();
-                $unifonicClient = new UnifonicClient();
-                $unifonicMessage->content = "تم ارسال معلومات الدفع الخاصة بك الي البريدالالكتروني ";
-                $to = $user_mobile;
-                $co = $message;
-                $data = $unifonicClient->sendCustomer($to, $co);
-                \Log::channel('single')->info($data);
-                \Log::channel('slack')->info($data);
 
             }
 
 
-        } else {
-
-            $text = 'رابط الدفع الخاص بك هو : ';
-            $message = 'http://aqarz.sa/plans/' . $user->unique_code;
-            ini_set("smtp_port", "465");
-
-            $to = $user->email;
-
-
-            $from = 'info@aqarz.sa';
-            $name = 'Aqarz';
-            $subject = 'رابط الدفع';
-
-
-            $logo = asset('logo.svg');
-            $link = '#';
-
-            $details = [
-                'to'       => $to,
-                'from'     => $from,
-                'logo'     => $logo,
-                'link'     => $link,
-                'subject'  => $subject,
-                'name'     => $name,
-                "message"  => $message,
-                "text_msg" => $text,
-            ];
-
-
-            // var_export (dns_get_record ( "host.name.tld") );
-
-            // dd(444);
-            \Mail::to($to)->send(new \App\Mail\NewMail($details));
-
-            /* if (Mail::failures()) {
-                 return response()->json([
-                     'status'  => false,
-                     'data'    => $details,
-                     'message' => 'Nnot sending mail.. retry again...'
-                 ]);
-             }*/
-
-
-            $user_mobile = checkIfMobileStartCode($user->mobile, $user->country_code);
-            $unifonicMessage = new UnifonicMessage();
-            $unifonicClient = new UnifonicClient();
-            $unifonicMessage->content = "Your Verification Code Is: ";
-            $to = $user_mobile;
-            $co = $message;
-            $data = $unifonicClient->sendCustomer($to, $co);
-            \Log::channel('single')->info($data);
-            \Log::channel('slack')->info($data);
-
-
-            //  return $data;
         }
 
 
-        \Session::flash('success', trans('تم ارسال بيانات الدفع بنجاح'));
+        \Session::flash('success', trans('تم التعديل بنجاح'));
 
-        return redirect()->route('admin.payment_requests.index');
+        return redirect()->route('admin.adds.index');
     }
 }

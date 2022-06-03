@@ -233,7 +233,7 @@ function get_admin_menu_list()
         [
 
             'url' => route('admin.adds.index'),
-            'icon' => 'flaticon2-user',
+            'icon' => 'flaticon2-image-file',
             'text' => __('views.adds'),
             'is_active' => str_contains(
                 request()->route()->getName(),
@@ -431,4 +431,8 @@ function checkIfMobileStartCode($mobile,$country_code = null){
 
     return $mobile;
 
+}
+function str_random($length = 16)
+{
+    return Str::random($length);
 }

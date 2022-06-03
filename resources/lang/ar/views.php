@@ -205,6 +205,9 @@ return [
     'Add'=>'إنشاء جديد',
     ':number Total' => 'الإجمالي :number',
     'Actions'=>'العمليات',
+    'edit'=>'تعديل',
+    'Edit'=>'تعديل',
+    'location'=>'الموقع',
     'unreactstorytime'=>'عدد ايام القصص الغير نشطة',
 
 ];

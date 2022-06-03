@@ -70,6 +70,12 @@ return [
             'url' => env('APP_URL'),
             'visibility' => 'public',
         ],
+        'adds' => [
+            'driver' => 'local',
+            'root' => base_path('storage/adds/'),
+            'url' => env('APP_URL'),
+            'visibility' => 'public',
+        ],
 
     ],
 

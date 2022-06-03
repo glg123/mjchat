@@ -93,7 +93,7 @@ Route::group(['middleware' => 'SetLocalizationFrontend'], function () {
             Route::get('/adds/create', 'Admin\SettingController@createAdds')->name('admin.adds.create');
             Route::post('/adds', 'Admin\SettingController@addsStore')->name('admin.adds.store');
             Route::get('/add/{id}/edit', 'Admin\SettingController@edit')->name('admin.adds.edit');
-            Route::get('/add/{id}/update', 'Admin\SettingController@Addupdate')->name('admin.adds.update');
+            Route::post('/add/{id}/update', 'Admin\SettingController@Addupdate')->name('admin.adds.update');
             Route::post('/adds/datatable', 'Admin\SettingController@Addsdatatable')->name('admin.adds.datatable');
 
 
