@@ -66,9 +66,9 @@
                                                                        placeholder="Enter a location">
                                                                 <div class="map" id="map" style="width: 100%; height: 300px;"></div>
                                                                 <div class="form_area">
-                                                                    <input type="text" disabled value="{{$setting->address}}" name="address" id="location">
-                                                                    <input type="text" value="{{$setting->latitude}}" name="latitude" id="lat">
-                                                                    <input type="text" value="{{$setting->longitude}}" name="longitude" id="lng">
+                                                                    <input type="text" disabled value="" name="address" id="location">
+                                                                    <input type="text" value="" name="latitude" id="lat">
+                                                                    <input type="text" value="" name="longitude" id="lng">
                                                                 </div>
 
                                                             </fieldset>
