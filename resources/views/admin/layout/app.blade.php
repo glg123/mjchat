@@ -431,7 +431,7 @@ var KTAppOptions = {
 
         <!--begin::Page Vendors(used by this page) -->
         <script src="{{asset('admin_assets/plugins/custom/fullcalendar/fullcalendar.bundle.js')}}" type="text/javascript"></script>
-        <script src="//maps.google.com/maps/api/js?key=AIzaSyBTGnKT7dt597vo9QgeQ7BFhvSRP4eiMSM" type="text/javascript"></script>
+        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAtdvEJAz8r2k5V6Q618BosZla0iGrdMqU&sensor=false"></script>
         <script src="{{asset('admin_assets/plugins/custom/gmaps/gmaps.js')}}" type="text/javascript"></script>
         <script src="{{asset('admin_assets/js/pages/crud/forms/widgets/bootstrap-datepicker.js')}}" type="text/javascript"></script>
         <script>
