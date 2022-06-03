@@ -29,17 +29,17 @@
         <!--end::Fonts -->
 
         <!--begin::Page Vendors Styles(used by this page) -->
-        <link href="admin_assets/plugins/custom/fullcalendar/fullcalendar.bundle.css" rel="stylesheet" type="text/css" />
+        <link href="{{asset('admin_assets/plugins/custom/fullcalendar/fullcalendar.bundle.css')}}" rel="stylesheet" type="text/css" />
 
         <!--end::Page Vendors Styles -->
 
         <!--begin::Global Theme Styles(used by all pages) -->
 @if(app()->getLocale() === "en")
-        <link href="admin_assets/plugins/global/plugins.bundle.css" rel="stylesheet" type="text/css" />
-        <link href="admin_assets/css/style.bundle.css" rel="stylesheet" type="text/css" />
+        <link href="{{asset('admin_assets/plugins/global/plugins.bundle.css')}}" rel="stylesheet" type="text/css" />
+        <link href="{{asset('admin_assets/css/style.bundle.css')}}" rel="stylesheet" type="text/css" />
 @else
-        <link href="admin_assets/plugins/global/plugins.bundle.rtl.css" rel="stylesheet" type="text/css" />
-        <link href="admin_assets/css/style.bundle.rtl.css" rel="stylesheet" type="text/css" />
+        <link href="{{asset('admin_assets/plugins/global/plugins.bundle.rtl.css')}}" rel="stylesheet" type="text/css" />
+        <link href="{{asset('admin_assets/css/style.bundle.rtl.css')}}" rel="stylesheet" type="text/css" />
         <style>
         html, body {
           font-family: 'Cairo', Poppins, Helvetica, sans-serif;
@@ -423,17 +423,17 @@ var KTAppOptions = {
         <!-- end::Global Config -->
 
         <!--begin::Global Theme Bundle(used by all pages) -->
-        <script src="admin_assets/plugins/global/plugins.bundle.js" type="text/javascript"></script>
-        <script src="admin_assets/js/scripts.bundle.js" type="text/javascript"></script>
+        <script src="{{asset('admin_assets/plugins/global/plugins.bundle.js')}}" type="text/javascript"></script>
+        <script src="{{asset('admin_assets/js/scripts.bundle.js')}}" type="text/javascript"></script>
         <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js" integrity="sha256-VeNaFBVDhoX3H+gJ37DpT/nTuZTdjYro9yBruHjVmoQ=" crossorigin="anonymous"></script>
 
         <!--end::Global Theme Bundle -->
 
         <!--begin::Page Vendors(used by this page) -->
-        <script src="admin_assets/plugins/custom/fullcalendar/fullcalendar.bundle.js" type="text/javascript"></script>
+        <script src="{{asset('admin_assets/plugins/custom/fullcalendar/fullcalendar.bundle.js')}}" type="text/javascript"></script>
         <script src="//maps.google.com/maps/api/js?key=AIzaSyBTGnKT7dt597vo9QgeQ7BFhvSRP4eiMSM" type="text/javascript"></script>
-        <script src="admin_assets/plugins/custom/gmaps/gmaps.js" type="text/javascript"></script>
-        <script src="admin_assets/js/pages/crud/forms/widgets/bootstrap-datepicker.js" type="text/javascript"></script>
+        <script src="{{asset('admin_assets/plugins/custom/gmaps/gmaps.js')}}" type="text/javascript"></script>
+        <script src="{{asset('admin_assets/js/pages/crud/forms/widgets/bootstrap-datepicker.js')}}" type="text/javascript"></script>
         <script>
 "use strict";
 
