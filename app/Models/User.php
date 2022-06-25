@@ -26,6 +26,18 @@ class User extends Authenticatable
     protected $fillable = [
         'first_name',
         'last_name',
+        'bio',
+        'iban_number',
+        'facebook_link',
+        'twitter_link',
+        'instagram_link',
+        'provider',
+        'provider_id',
+        'date_of_birth',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'country_id',
+        'suspend',
         'email',
         'password',
         'api_token',
@@ -86,45 +98,61 @@ class User extends Authenticatable
 
     }
 
-    public function stories(){
-        return $this->hasMany(Post::class,'user_id')->where('type','=',1);
+    public function stories()
+    {
+        return $this->hasMany(Post::class, 'user_id')
+            ->where('type', '=', 1);
     }
 
-    public function posts(){
-        return $this->hasMany(Post::class,'user_id')->where('type','=',2);
-    }
-    public function comments(){
-        return $this->hasMany(Comment::class,'user_id');
-    }
-    public function post_story(){
-        return $this->hasMany(Post::class,'user_id');
+    public function posts()
+    {
+        return $this->hasMany(Post::class, 'user_id')->where('type', '=', 2);
     }
 
-    public function locations(){
-        return $this->hasMany(UserLocation::class,'user_id');
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'user_id');
     }
 
-    public function following(){
-        return $this->belongsToMany(User::class,'follow_users','follower_id','follow_id');
+    public function post_story()
+    {
+        return $this->hasMany(Post::class, 'user_id');
     }
 
-    public function flowers(){
-        return $this->belongsToMany(User::class,'follow_users','follow_id','follower_id');
+    public function locations()
+    {
+        return $this->hasMany(UserLocation::class, 'user_id');
     }
 
-    public function savedPosts(){
-        return $this->belongsToMany(Post::class,'fav_stories','user_id','story_id');
-    }
-    public function groups_members(){
-        return $this->belongsToMany(GroupChat::class,'group_chat_members','user_id','user_id');
+    public function following()
+    {
+        return $this->belongsToMany(User::class, 'follow_users', 'follower_id', 'follow_id');
     }
 
-    public function mygroups(){
-        return $this->hasMany(GroupChat::class,'user_id');
+    public function flowers()
+    {
+        return $this->belongsToMany(User::class, 'follow_users', 'follow_id', 'follower_id');
     }
-    public function blockUsers(){
-        return $this->belongsToMany(User::class,'userblocks','user_id','block_user_id')
-            ->where('userblocks.status','1');
+
+    public function savedPosts()
+    {
+        return $this->belongsToMany(Post::class, 'fav_stories', 'user_id', 'story_id');
+    }
+
+    public function groups_members()
+    {
+        return $this->belongsToMany(GroupChat::class, 'group_chat_members', 'user_id', 'user_id');
+    }
+
+    public function mygroups()
+    {
+        return $this->hasMany(GroupChat::class, 'user_id');
+    }
+
+    public function blockUsers()
+    {
+        return $this->belongsToMany(User::class, 'userblocks', 'user_id', 'block_user_id')
+            ->where('userblocks.status', '1');
     }
 
 

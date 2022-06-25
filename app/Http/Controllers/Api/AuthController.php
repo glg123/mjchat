@@ -316,9 +316,9 @@ class AuthController extends Controller
         $user->api_token = $user->createToken('api_token')->plainTextToken;
 
         $user->save();
-
-
-        return JsonResponse::success($user, "User Profile");
+        $user = User::find($user->id);
+        $user = UserResource::collection([$user]);
+        return JsonResponse::success($user[0], "User Profile");
         //  return ['data' => $user];
     }
 
@@ -674,11 +674,11 @@ class AuthController extends Controller
         $rules = Validator::make($request->all(), [
 
 
-            'email' => 'sometimes|required|unique:users,email,' . $user->id . ',id,deleted_at,NULL',
-            'first_name' => 'sometimes|required',
-            'last_name' => 'sometimes|required',
-            'gender' => 'sometimes|required|string',
-            'date_of_birth' => 'sometimes|required|date|before:2003-01-01',
+         //   'email' => 'sometimes|required|unique:users,email,' . $user->id . ',id,deleted_at,NULL',
+         //   'first_name' => 'sometimes|required',
+         //   'last_name' => 'sometimes|required',
+         //   'gender' => 'sometimes|required|string',
+         //   'date_of_birth' => 'sometimes|required|date|before:2003-01-01',
             // 'user_name' => 'sometimes|required|unique:users,user_name',
             'user_name' => ['required', 'string', 'max:255', 'unique:users',
                 'regex:/^[A-Za-z0-9]+(?:[ _-][A-Za-z0-9]+)*$/'],
@@ -700,6 +700,7 @@ class AuthController extends Controller
             $user->update($request->only([
 
                 'first_name',
+                'user_name',
                 'last_name',
                 'email',
                 'mobile',
@@ -707,6 +708,18 @@ class AuthController extends Controller
                 'date_of_birth',
                 'user_name',
                 'comment_privacy',
+                'bio',
+                'iban_number',
+                'facebook_link',
+                'twitter_link',
+                'instagram_link',
+                'provider',
+                'provider_id',
+                'date_of_birth',
+                'two_factor_secret',
+                'two_factor_recovery_codes',
+                'country_id',
+                'suspend',
 
 
             ]));
@@ -714,22 +727,7 @@ class AuthController extends Controller
 
             $user = User::find($user->id);
 
-            if ($request->get('skills')) {
-                $array = explode(',', $request->get('skills'));
 
-                for ($i = 0; $i < count($array); $i++) {
-                    $skill = Skill::find($array[$i]);
-                    $checkUserSkill = UserSkill::where('user_id', $user->id)
-                        ->where('skill_id', $array[$i])->first();
-                    if ($skill && !$checkUserSkill) {
-                        $userSkill = UserSkill::create([
-                            'skill_id' => $array[$i],
-                            'user_id' => $user->id,
-                            'skill_name' => $skill->name_ar,
-                        ]);
-                    }
-                }
-            }
 
 
             $user = User::where('id', $user->id)
@@ -1029,7 +1027,7 @@ class AuthController extends Controller
 
         $user = User::find($user->id);
         $posts = $user->stories()->latest()->paginate(5);
-        $posts = PostResource::collection($posts);
+        $posts = PostResource::collection($posts)->response()->getData(true);
         return JsonResponse::success($posts, __('views.Done'));
 
 
@@ -1049,7 +1047,7 @@ class AuthController extends Controller
 
         $user = User::find($user->id);
         $posts = $user->posts()->latest()->paginate(5);
-        $posts = PostResource::collection($posts);
+        $posts = PostResource::collection($posts)->response()->getData(true);
         return JsonResponse::success($posts, __('views.Done'));
 
 
@@ -1201,7 +1199,9 @@ class AuthController extends Controller
 
         $user = User::find($user->id);
         $block_users = $user->blockUsers()->paginate(5);
-        $resource = appuserabdResponse::collection($block_users);
+
+
+        $resource = appuserabdResponse::collection($block_users)->response()->getData(true);
         return JsonResponse::success($resource, __('views.Done'));
 
     }
@@ -1218,7 +1218,7 @@ class AuthController extends Controller
 
         $user = User::find($user->id);
         $followers = $user->flowers()->paginate(5);
-        $resource = appuserabdResponse::collection($followers);
+        $resource = appuserabdResponse::collection($followers)->response()->getData(true);
         return JsonResponse::success($resource, __('views.Done'));
     }
 
@@ -1233,7 +1233,7 @@ class AuthController extends Controller
 
         $user = User::find($user->id);
         $followers = $user->following()->paginate(5);
-        $resource = appuserabdResponse::collection($followers);
+        $resource = appuserabdResponse::collection($followers)->response()->getData(true);
         return JsonResponse::success($resource, __('views.Done'));
     }
 
@@ -1299,9 +1299,122 @@ class AuthController extends Controller
         $user_id = $this->getUserID($request->bearerToken());
         $user = appuser::find($user_id);
         $followers = $user->myVideos()->paginate(5);
-        $resource = appuserabdResponse::collection($followers);
+        $resource = appuserabdResponse::collection($followers)->response()->getData(true);
         return $this->returnData('posts', $resource);
     }
 
 
+
+    public function userStoires(Request $request)
+    {
+
+        $user = $request->user();
+        if (!$request->user()) {
+            //return JsonResponse::fail('Credentials not match', 401);
+
+            return JsonResponse::fail(__('views.not authorized'));
+
+        }
+
+        $rules = Validator::make($request->all(), [
+
+            'user_id' => 'required|exists:users,id',
+
+
+
+        ]);
+
+        if ($rules->fails()) {
+            return JsonResponse::fail($rules->errors()->first(), 400);
+        }
+        $userProfile = User::find($request->get('user_id'));
+        $posts = $userProfile->stories()->latest()->paginate(5);
+        $posts = PostResource::collection($posts)->response()->getData(true);
+        return JsonResponse::success($posts, __('views.Done'));
+
+
+    }
+
+    public function userPosts(Request $request)
+    {
+
+        $user = $request->user();
+        if (!$request->user()) {
+            //return JsonResponse::fail('Credentials not match', 401);
+
+            return JsonResponse::fail(__('views.not authorized'));
+
+        }
+        $rules = Validator::make($request->all(), [
+
+            'user_id' => 'required|exists:users,id',
+
+
+
+        ]);
+
+        if ($rules->fails()) {
+            return JsonResponse::fail($rules->errors()->first(), 400);
+        }
+
+        $userProfile = User::find($request->get('user_id'));
+        $posts = $userProfile->posts()->latest()->paginate(5);
+        $posts = PostResource::collection($posts)->response()->getData(true);
+        return JsonResponse::success($posts, __('views.Done'));
+
+
+    }
+    public function userfollowers(Request $request)
+    {
+        $user = $request->user();
+        if (!$request->user()) {
+
+            return JsonResponse::fail(__('views.not authorized'));
+
+        }
+
+        $rules = Validator::make($request->all(), [
+
+            'user_id' => 'required|exists:users,id',
+
+
+
+        ]);
+
+        if ($rules->fails()) {
+            return JsonResponse::fail($rules->errors()->first(), 400);
+        }
+
+        $userProfile = User::find($request->get('user_id'));
+        $followers = $userProfile->flowers()->paginate(5);
+        $resource = appuserabdResponse::collection($followers)->response()->getData(true);
+        return JsonResponse::success($resource, __('views.Done'));
+    }
+
+    public function userfollowing(Request $request)
+    {
+        $user = $request->user();
+        if (!$request->user()) {
+
+            return JsonResponse::fail(__('views.not authorized'));
+
+        }
+
+        $rules = Validator::make($request->all(), [
+
+            'user_id' => 'required|exists:users,id',
+
+
+
+        ]);
+
+        if ($rules->fails()) {
+            return JsonResponse::fail($rules->errors()->first(), 400);
+        }
+
+        $userProfile = User::find($request->get('user_id'));
+        $followers = $userProfile->following()->paginate(5);
+        $resource = appuserabdResponse::collection($followers)->response()->getData(true);
+        return JsonResponse::success($resource, __('views.Done'));
+    }
 }

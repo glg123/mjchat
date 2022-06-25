@@ -46,7 +46,7 @@ class PromotionController extends Controller
 
         }
 
-        $PromotionPackages = PromotionPackage::where('status', 1)->get();
+        $PromotionPackages = PromotionPackage::where('status', 1)->paginate();
 
         return JsonResponse::success($PromotionPackages, __('views.Done'));
 

@@ -74,7 +74,7 @@ class StoryController extends Controller
         ]);
 
 
-        $map = MapResource::collection($data);
+        $map = MapResource::collection($data)->response()->getData(true);
         return JsonResponse::success($map, __('views.Done'));
 
 
@@ -554,6 +554,7 @@ class StoryController extends Controller
 
     public function mysavedPosts(Request $request)
     {
+
         $user = $request->user();
         if (!$request->user()) {
 
@@ -562,8 +563,8 @@ class StoryController extends Controller
         }
 
         $user = User::find($user->id);
-        $posts = $user->savedPosts;
-        $resource = AllStoriesResource::collection($posts);
+        $posts = $user->savedPosts()->paginate();
+        $resource = AllStoriesResource::collection($posts)->response()->getData(true);;
         return JsonResponse::success($resource, __("views.Done"));
     }
 
@@ -779,7 +780,7 @@ class StoryController extends Controller
             $groups = $groups->where('id', $request->get('group_id'));
 
         }
-        $groups = $groups->get();
+        $groups = $groups->paginate();
         return JsonResponse::success($groups, __("views.Done"));
 
     }
@@ -814,7 +815,7 @@ class StoryController extends Controller
             $groups = $groups->where('group_id', $request->get('group_id'));
 
         }
-        $groups = $groups->get();
+        $groups = $groups->paginate();
 
         $groups = GropChatMemberResource::collection($groups);
 

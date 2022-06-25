@@ -54,7 +54,7 @@ class UserController extends Controller
         foreach ($posts as $key => $single) {
             $posts[$key]->check_id = $user->id;
         }
-        $posts = PostResource::collection($posts);
+        $posts = PostResource::collection($posts)->response()->getData(true);
         return JsonResponse::success($posts, __('views.Done'));
     }//end otheruserProfile
     public function HomePosts(Request $request)
@@ -85,7 +85,7 @@ class UserController extends Controller
                 foreach ($stories as $key => $single) {
                     $stories[$key]->check_id = $user->id;
                 }
-                $storyResource = PostResource::collection($stories);
+                $storyResource = PostResource::collection($stories)->response()->getData(true);
                 return JsonResponse::success($storyResource, __('views.Done'));
             }
             else {
@@ -95,7 +95,7 @@ class UserController extends Controller
                 $posts=Post::whereIn('user_id',$following->toArray())
                     ->whereNotIn('user_id',$block_users->toArray())->paginate(5);
 
-                $resource = PostResource::collection($posts);
+                $resource = PostResource::collection($posts)->response()->getData(true);
                 return JsonResponse::success($resource, __('views.Done'));
 
             }
@@ -123,7 +123,7 @@ class UserController extends Controller
 
 
         $users=$users->latest()->paginate(10);
-        $users = SearchResponse::collection($users);
+        $users = SearchResponse::collection($users)->response()->getData(true);
         return JsonResponse::success($users, __('views.Done'));
 
     }

@@ -17,7 +17,7 @@ class UserResource extends JsonResource
     public function toArray($request)
     {
 
-
+//
         return [
             'id'                     =>        $this->id,
             'first_name'             =>        $this->first_name ?? "",
@@ -29,6 +29,10 @@ class UserResource extends JsonResource
             'date_of_birth'          =>        $this->date_of_birth ?? "",
             'comment_privacy'          =>        $this->comment_privacy ?? 1,
             'email'                  =>        $this->email         ?? "",
+            'facebook_link'              =>        $this->facebook_link     ?? "",
+            'twitter_link'              =>        $this->twitter_link     ?? "",
+            'instagram_link'              =>        $this->instagram_link     ?? "",
+            'iban_number'              =>        $this->iban_number     ?? "",
             'api_token'              =>        $this->api_token     ?? "",
             'locations'              =>       @userlocationsResource::collection($this->locations),
 
