@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Comment;
 use App\Models\User;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +20,7 @@ class SingleStoryResource extends JsonResource
         $user=User::find($this->user_id);
         $likecount=DB::table('strorylikes')->where('story_id','=',$this->id)->where('status','=',1)->count();
         $viewcount=DB::table('story_views')->where('story_id',$this->id)->count();
-        $comments=DB::table('comments')->where('post_id','=',$this->id)->where('status','=',1)->count();
+        $comments=Comment::with('comments')->where('post_id','=',$this->id)->where('status','=',1)->count();
         $like_status=DB::table('strorylikes')->where('story_id','=',$this->id)->where('user_id','=',$this->current_users)->value('status');
         if ($like_status==1){
             $like_statusx=1;

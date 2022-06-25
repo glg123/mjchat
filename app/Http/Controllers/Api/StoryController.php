@@ -581,7 +581,10 @@ class StoryController extends Controller
         }
 
         $user = User::find($user->id);
-        $comments = Comment::where('post_id', $id)->where('perant_id', '=', null)->latest()->paginate(10);
+        $comments = Comment::with('comments')
+            ->where('post_id', $id)
+            //->where('perant_id', '=', null)
+            ->latest()->paginate(10);
         foreach ($comments as $key => $ab) {
             $comments[$key]->cur_id = $user->id;
         }
@@ -606,6 +609,7 @@ class StoryController extends Controller
         $rules = Validator::make($request->all(), [
 
             'post_id' => 'required|exists:posts,id',
+            'perant_id' => 'sometimes|required|exists:comments,id',
             'text' => 'required',
 
 

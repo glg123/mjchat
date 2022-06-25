@@ -24,7 +24,8 @@ class MapResource extends JsonResource
             ->get();
         $storyResource=AllStoriesResource::collection($stories);
         $q2=Post::distance($request->get('lan'),$request->get('lang'));
-        $stories2=$q2->orderBy('distance', 'ASC')->where('recommended','=',1)->get();
+        $stories2=$q2->orderBy('distance', 'ASC')
+            ->where('recommended','=',1)->get();
         $storyResource2=AllStoriesResource::collection($stories2);
         $adds=add::distance($request->get('lan'),$request->get('lang'));
         $addsx=$adds->orderBy('distance', 'ASC')->where('type',1)->inRandomOrder()->first();
