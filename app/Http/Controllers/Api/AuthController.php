@@ -680,7 +680,7 @@ class AuthController extends Controller
          //   'gender' => 'sometimes|required|string',
          //   'date_of_birth' => 'sometimes|required|date|before:2003-01-01',
             // 'user_name' => 'sometimes|required|unique:users,user_name',
-            'user_name' => ['required', 'string', 'max:255', 'unique:users',
+            'user_name' => ['sometimes','required', 'string', 'max:255', 'unique:users',
                 'regex:/^[A-Za-z0-9]+(?:[ _-][A-Za-z0-9]+)*$/'],
         ]);
 
