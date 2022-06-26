@@ -104,7 +104,7 @@ class StoryController extends Controller
         }
 
 
-        StoryView::updateOrCreate([
+        $storyView=StoryView::updateOrCreate([
             'user_id' => $user->id,
             'story_id' => $request->get('story_id'),
         ]);
