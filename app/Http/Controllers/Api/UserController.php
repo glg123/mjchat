@@ -35,6 +35,16 @@ class UserController extends Controller
 
         $userShow = User::find($id);
         $user->check_id = $user->id;
+        $request->merge([
+            'id' => $id,
+            'check_id' => $user->id,
+        ]);
+
+        if(!$userShow)
+        {
+            return JsonResponse::fail(__('views.not found'));
+        }
+
         $userShow = aboutUserResource::collection([$userShow]);
         return JsonResponse::success($userShow[0], __('views.Done'));
     }//end otheruserProfile

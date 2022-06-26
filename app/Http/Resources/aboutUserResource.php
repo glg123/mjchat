@@ -15,7 +15,11 @@ class aboutUserResource extends JsonResource
      */
     public function toArray($request)
     {
-          $folowstate=DB::table('follow_users')->where('follow_id','=',$this->id)->where('follower_id','=',$this->check_id)->where('status',1)->count();
+
+
+          $folowstate=DB::table('follow_users')
+              ->where('follow_id','=',$this->id)
+              ->where('follower_id','=',$this->check_id)->where('status',1)->count();
           $folowers=DB::table('follow_users')->where('follow_id','=',$this->id)->where('status',1)->count();
           $folowing=DB::table('follow_users')->where('follower_id','=',$this->id)->where('status',1)->count();
           $posts=DB::table('posts')->where('user_id','=',$this->id)->where('type',2)->count();
