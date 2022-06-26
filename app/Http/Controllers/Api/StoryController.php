@@ -22,7 +22,7 @@ use App\Models\SaveStory;
 use App\Models\Setting;
 use App\Models\ShareStory;
 use App\Models\Storyblock;
-use App\Models\storyView;
+use App\Models\StoryView;
 use App\Models\Strorylike;
 use App\Models\User;
 
