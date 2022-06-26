@@ -563,7 +563,7 @@ class StoryController extends Controller
         }
 
         $user = User::find($user->id);
-        $posts = $user->savedPosts()->paginate();
+        $posts = $user->savedPosts()->where('status',1)->paginate();
         $resource = AllStoriesResource::collection($posts)->response()->getData(true);;
         return JsonResponse::success($resource, __("views.Done"));
     }
