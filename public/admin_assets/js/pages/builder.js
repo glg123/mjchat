@@ -107,7 +107,8 @@ var KTLayoutBuilder = function() {
 							builder_export: 1,
 							builder_check: result.id,
 						},
-					}).done(function(r) {
+					})
+                        .done(function(r) {
 						var result = JSON.parse(r);
 						if (typeof result === 'undefined') return;
 						// export status 1 is completed

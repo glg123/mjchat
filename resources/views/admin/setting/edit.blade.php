@@ -110,7 +110,17 @@
                                                     </div>
                                                 </div>
 
-                                              
+                                                <div class="form-group row">
+                                                    <label class="col-xl-3 col-lg-3 col-form-label">{{__('views.google_map_key')}}</label>
+                                                    <div class="col-lg-9 col-xl-6">
+                                                        <div class="input-group validated">
+                                                            <input  type="text" value="{{$admin->mobile}}" name="mobile" class="form-control" placeholder="{{__('views.mobile')}}">
+
+                                                            <div class="invalid-feedback">{{$errors->first('mobile')}}</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
 
 
                                         </div>

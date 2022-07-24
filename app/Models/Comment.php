@@ -10,7 +10,8 @@ class Comment extends Model
 {
     use HasFactory;
     use SoftDeletes;
-    protected $guarded=[];
+
+    protected $guarded = [];
     protected $fillable = [
         'user_id',
         'post_id',
@@ -19,8 +20,28 @@ class Comment extends Model
         'status',
         'state',
     ];
-    public function comments(){
-        return $this->hasMany(Comment::class,'perant_id');
+    protected $appends = ['readed_time'];
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'perant_id');
+    }
+
+    public function post()
+    {
+        return $this->hasOne(Post::class, 'id', 'post_id');
+    }
+
+    public function user()
+    {
+        return $this->hasOne(User::class, 'id', 'user_id');
+    }
+
+    public function getReadedTimeAttribute()
+    {
+
+        return $this->created_at->diffForHumans();
+
     }
 
 }

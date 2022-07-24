@@ -11,6 +11,8 @@ use App\Http\Resources\GropChatResource;
 use App\Http\Resources\MapResource;
 use App\Http\Resources\SingleStoryResource;
 
+use App\Http\Resources\userAddsResource;
+use App\Models\add;
 use App\Models\appuser;
 use App\Models\Comment;
 use App\Models\CommentLikes;
@@ -39,7 +41,7 @@ use Illuminate\Support\Facades\Validator;
 class StoryController extends Controller
 {
 
-    protected function storymap(Request $request)
+    protected function storymap2(Request $request)
     {
 
 
@@ -74,11 +76,115 @@ class StoryController extends Controller
         ]);
 
 
+        $q = Post::distance($request->get('lan'), $request->get('lang'));
+        $stories = $q->orderBy('distance', 'ASC')
+            ->where('type', '=', 1)
+            ->get();
+        $storyResource = AllStoriesResource::collection($stories);
+
+
         $map = MapResource::collection($data)->response()->getData(true);
         return JsonResponse::success($map, __('views.Done'));
 
 
     }//end of index
+
+
+    public function storymap(Request $request)
+    {
+
+        $user = $request->user();
+        if (!$request->user()) {
+
+            return JsonResponse::fail(__('views.not authorized'));
+
+        }
+        $rules = Validator::make($request->all(), [
+            //   'is_list' => 'required',
+            'lat' => 'required',
+            'long' => 'required',
+
+
+        ]);
+
+        if ($rules->fails()) {
+            return JsonResponse::fail($rules->errors()->first(), 400);
+        }
+        $followers = $user->following()->pluck('users.id');
+        $array = array_map('intval', $followers->toArray());
+        $array = join(",", $array);
+        $array = '(' . $array . ')';
+        //  $query .= ' and city_id   IN ("' . $array . '") ';
+
+
+        $friendPost = DB::table('posts')
+            ->select('posts.*')
+            ->whereRaw(' deleted_at is null');
+         //   ->whereRaw('  user_id   IN ' . $array);
+
+        $PromotionPost = Post::whereHas('PromotionPost')
+            ->select('posts.*')
+            ->whereRaw(' deleted_at is null');
+
+
+        $adds = add::whereRaw(' deleted_at is null');
+
+        $distance = 500;
+        if ($request->get('lat') && $request->get('long')) {
+
+
+            $attitude = $request->get('lat');
+            $longitude = $request->get('long');
+            $distanceL = $distance;
+
+
+            if ($attitude && $longitude) {
+                $location = nearest($attitude, $longitude, $distanceL);
+
+
+
+
+                $friendPost=    $friendPost->whereRaw('  posts.lat  between ' . $location->min_lat .
+                    ' and ' . $location->max_lat .
+                    ' and posts.long between '
+                    . $location->min_lng .
+                    ' and ' . $location->max_lng .
+                    ' and posts.deleted_at is null'
+                );
+
+
+                $PromotionPost=    $PromotionPost->whereRaw('  posts.lat  between ' . $location->min_lat .
+                    ' and ' . $location->max_lat .
+                    ' and posts.long between '
+                    . $location->min_lng .
+                    ' and ' . $location->max_lng .
+                    ' and posts.deleted_at is null'
+                );
+                $adds=   $adds->whereRaw('  adds.lat  between ' . $location->min_lat .
+                    ' and ' . $location->max_lat .
+                    ' and adds.long between '
+                    . $location->min_lng .
+                    ' and ' . $location->max_lng .
+                    ' and adds.deleted_at is null'
+                );
+            }
+
+
+        }
+        $friendPost = $friendPost->orderByRaw(DB::Raw(' `posts`.`id` desc '))->get();
+        $PromotionPost = $PromotionPost->orderByRaw(DB::Raw(' `posts`.`id` desc '))->get();
+        $adds = $adds->orderByRaw(DB::Raw(' `adds`.`id` desc '))->get();
+        $friendPost=AllStoriesResource::collection($friendPost);
+        $PromotionPost=AllStoriesResource::collection($PromotionPost);
+        $adds= userAddsResource::collection($adds);
+$array=[
+    'friendStories'=>$friendPost,
+    'PromotionStories'=>$PromotionPost,
+    'adds'=>$adds,
+
+];
+        return JsonResponse::success($array, __('views.Done'));
+    }
 
 
     public function singleStory(Request $request)
@@ -104,7 +210,7 @@ class StoryController extends Controller
         }
 
 
-        $storyView=StoryView::updateOrCreate([
+        $storyView = StoryView::updateOrCreate([
             'user_id' => $user->id,
             'story_id' => $request->get('story_id'),
         ]);
@@ -563,7 +669,7 @@ class StoryController extends Controller
         }
 
         $user = User::find($user->id);
-        $posts = $user->savedPosts()->where('fav_stories.status',1)->paginate();
+        $posts = $user->savedPosts()->where('fav_stories.status', 1)->paginate();
         $resource = AllStoriesResource::collection($posts)->response()->getData(true);;
         return JsonResponse::success($resource, __("views.Done"));
     }
@@ -1014,7 +1120,7 @@ class StoryController extends Controller
     }
 
 
-    public function deleteGroup(Request $request,$id)
+    public function deleteGroup(Request $request, $id)
     {
         $user = $request->user();
         if (!$request->user()) {

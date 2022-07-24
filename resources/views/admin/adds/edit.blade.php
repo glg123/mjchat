@@ -2,7 +2,7 @@
 @push('css')
 
     <script type="text/javascript"
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDLsm2Z-ym0-0KWwYGBU2JZYYp47Qaa5uM&sensor=false&libraries=places"></script>
+            src="https://maps.googleapis.com/maps/api/js?key={{$settings['google_map_key']}}&sensor=false&libraries=places"></script>
     <style type="text/css">
         .input-controls {
             margin-top: 10px;

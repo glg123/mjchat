@@ -15277,7 +15277,7 @@ canvas {
   -ms-user-select: none; }
 
 /* Customize website's scrollbar like Mac OS */
-/* 
+/*
 ::-webkit-scrollbar {
     background-color:#f6f6f6;
     width:14px;
@@ -28484,7 +28484,8 @@ strong {
   .kt-chat .kt-chat__messages.kt-chat__messages--solid .kt-chat__message {
     padding: 1.3rem 1.7rem;
     margin: 1.5rem 0;
-    display: inline-block; }
+    display: block;
+  }
     .kt-chat .kt-chat__messages.kt-chat__messages--solid .kt-chat__message:first-child {
       margin-top: 0; }
     .kt-chat .kt-chat__messages.kt-chat__messages--solid .kt-chat__message .kt-chat__text {
@@ -28492,7 +28493,7 @@ strong {
       margin-top: 0.5rem;
       background: none !important; }
     .kt-chat .kt-chat__messages.kt-chat__messages--solid .kt-chat__message.kt-chat__message--right {
-      float: left; }
+     /* float: left;*/ }
     .kt-chat .kt-chat__messages.kt-chat__messages--solid .kt-chat__message.kt-chat__message--brand {
       background: rgba(44, 119, 244, 0.1); }
     .kt-chat .kt-chat__messages.kt-chat__messages--solid .kt-chat__message.kt-chat__message--light {

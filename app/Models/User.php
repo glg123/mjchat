@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -16,6 +17,7 @@ class User extends Authenticatable
     use HasFactory;
     use HasProfilePhoto;
     use Notifiable;
+    use SoftDeletes;
     use TwoFactorAuthenticatable;
 
     /**
@@ -78,6 +80,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+    protected $appends = ['status_text'];
 
     /**
      * The accessors to append to the model's array form.
@@ -95,6 +98,22 @@ class User extends Authenticatable
             return \Storage::disk('users')->url($value);
         }
         return \Storage::disk('users')->url('');
+
+    }
+
+    public function getStatusTextAttribute()
+    {
+
+        if ($this->status == 1) {
+            $status_text = __('views.Active');
+                    }
+        else if ($this->status == 2) {
+            $status_text = __('views.Not_Active');
+                    }
+        else if ($this->status == 3) {
+            $status_text = __('views.Block');
+                    }
+        return $status_text;
 
     }
 

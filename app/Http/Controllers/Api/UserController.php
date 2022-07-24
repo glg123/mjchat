@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\JsonResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\aboutUserResource;
+use App\Http\Resources\AllStoriesResource;
 use App\Http\Resources\MapResource;
 use App\Http\Resources\PostResource;
 use App\Http\Resources\SearchResponse;
@@ -21,7 +22,7 @@ use Illuminate\Support\Facades\Validator;
 class UserController extends Controller
 {
 
-    public function userShow(Request $request,$id)
+    public function userShow(Request $request, $id)
     {
         $user = $request->user();
         if (!$request->user()) {
@@ -32,7 +33,6 @@ class UserController extends Controller
         }
 
 
-
         $userShow = User::find($id);
         $user->check_id = $user->id;
         $request->merge([
@@ -40,8 +40,7 @@ class UserController extends Controller
             'check_id' => $user->id,
         ]);
 
-        if(!$userShow)
-        {
+        if (!$userShow) {
             return JsonResponse::fail(__('views.not found'));
         }
 
@@ -49,7 +48,7 @@ class UserController extends Controller
         return JsonResponse::success($userShow[0], __('views.Done'));
     }//end otheruserProfile
 
-    public function userPosts(Request $request,$id)
+    public function userPosts(Request $request, $id)
     {
         $user = $request->user();
         if (!$request->user()) {
@@ -67,6 +66,7 @@ class UserController extends Controller
         $posts = PostResource::collection($posts)->response()->getData(true);
         return JsonResponse::success($posts, __('views.Done'));
     }//end otheruserProfile
+
     public function HomePosts(Request $request)
     {
         $user = $request->user();
@@ -88,27 +88,33 @@ class UserController extends Controller
         if ($rules->fails()) {
             return JsonResponse::fail($rules->errors()->first(), 400);
         }
-
-            if ($request->type == 1) {
-                $q = Post::distance($request->lat, $request->long);
-                $stories = $q->whereNotIn('user_id', $block_users->toArray())->orderBy('distance', 'ASC')->where('type', '=', 2)->latest()->paginate(5);
-                foreach ($stories as $key => $single) {
-                    $stories[$key]->check_id = $user->id;
-                }
-                $storyResource = PostResource::collection($stories)->response()->getData(true);
-                return JsonResponse::success($storyResource, __('views.Done'));
+        $PromotionPost = Post::whereHas('PromotionPost')
+            ->select('posts.*')
+            ->whereRaw(' deleted_at is null')->paginate(5);
+        $PromotionPost = AllStoriesResource::collection($PromotionPost)->response()->getData(true);
+        if ($request->type == 1) {
+            $q = Post::distance($request->lat, $request->long);
+            $stories = $q->whereNotIn('user_id', $block_users->toArray())->orderBy('distance', 'ASC')->where('type', '=', 2)->latest()->paginate(5);
+            foreach ($stories as $key => $single) {
+                $stories[$key]->check_id = $user->id;
             }
-            else {
-                $arr = [];
-                $user = User::find($user->id);
-                $following = $user->following()->pluck('users.id');
-                $posts=Post::whereIn('user_id',$following->toArray())
-                    ->whereNotIn('user_id',$block_users->toArray())->paginate(5);
+            $storyResource = PostResource::collection($stories)->response()->getData(true);
 
-                $resource = PostResource::collection($posts)->response()->getData(true);
-                return JsonResponse::success($resource, __('views.Done'));
+            $homePost = ['posts' => $storyResource, 'PromotionPost' => $PromotionPost];
+            return JsonResponse::success($homePost, __('views.Done'));
+        } else {
+            $arr = [];
+            $user = User::find($user->id);
+            $following = $user->following()->pluck('users.id');
+            $posts = Post::whereIn('user_id', $following->toArray())
+                ->whereNotIn('user_id', $block_users->toArray())->paginate(5);
 
-            }
+            $resource = PostResource::collection($posts)->response()->getData(true);
+            $homePost = ['posts' => $resource, 'PromotionPost' => $PromotionPost];
+
+            return JsonResponse::success($homePost, __('views.Done'));
+
+        }
 
     }
 
@@ -116,7 +122,7 @@ class UserController extends Controller
     {
         $rules = Validator::make($request->all(), [
 
-        //    'search' => 'required',
+            //    'search' => 'required',
 
 
         ]);
@@ -126,13 +132,12 @@ class UserController extends Controller
         }
         $users = User::query();
 
-            if($request->get('search'))
-            {
-                $users=$users->where('first_name', 'like', '%' . trim($request->search) . '%');
-            }
+        if ($request->get('search')) {
+            $users = $users->where('first_name', 'like', '%' . trim($request->search) . '%');
+        }
 
 
-        $users=$users->latest()->paginate(10);
+        $users = $users->latest()->paginate(10);
         $users = SearchResponse::collection($users)->response()->getData(true);
         return JsonResponse::success($users, __('views.Done'));
 

@@ -34,7 +34,7 @@ class Post extends Model
         'start_date',
         'expire_date',
     ];
-
+protected $appends=['user_name'];
     public function owner()
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -54,4 +54,15 @@ class Post extends Model
     public function comments(){
         return $this->hasMany(Comment::class,'post_id');
     }
+
+    public function PromotionPost(){
+        return $this->hasOne(PromotionPost::class,'post_id');
+    }
+    public function getUserNameAttribute()
+    {
+
+     return @$this->owner->first_name.' '.@$this->owner->last_name;
+
+    }
+
 }

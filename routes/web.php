@@ -84,7 +84,19 @@ Route::group(['middleware' => 'SetLocalizationFrontend'], function () {
             Route::get('/users', 'Admin\UserController@users')->name('admin.users.index');
             Route::get('/user/{id}/show', 'Admin\UserController@edit')->name('admin.users.show');
             Route::get('/user/{id}/update', 'Admin\UserController@update')->name('admin.users.update');
+            Route::post('/user/status', 'Admin\UserController@changeStatus')->name('admin.users.status');
+            Route::post('/user/delete/{id}', 'Admin\UserController@changeStatus')->name('admin.users.delete');
             Route::post('/users/datatable', 'Admin\UserController@datatable')->name('admin.users.datatable');
+
+
+
+            Route::get('/posts', 'Admin\PostController@posts')->name('admin.posts.index');
+            Route::post('/post/comment', 'Admin\PostController@postComment')->name('admin.postComment.show');
+            Route::get('/post/{id}/show', 'Admin\PostController@edit')->name('admin.posts.show');
+            Route::get('/post/{id}/update', 'Admin\PostController@update')->name('admin.posts.update');
+            Route::post('/post/status', 'Admin\PostController@changeStatus')->name('admin.posts.status');
+            Route::post('/post/delete/{id}', 'Admin\PostController@changeStatus')->name('admin.posts.delete');
+            Route::post('/post/datatable', 'Admin\PostController@datatable')->name('admin.posts.datatable');
 
 
 

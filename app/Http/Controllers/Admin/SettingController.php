@@ -100,34 +100,8 @@ class SettingController extends Controller
     }
 
 
-    public function city_select2(Request $request)
-    {
-        $search = $request->get('q', '');
-        $data = City::where('name_ar', 'like', '%' . $search . '%')
-            ->orWhere('name_en', 'like', '%' . $search . '%')
-            ->paginate()->toArray();
-        array_unshift($data['data'], [
-            'id' => 'null',
-            'title' => __('root'),
-        ]);
-        return $data;
-    }
 
 
-    public function neighborhood_select2(Request $request)
-    {
-        $search = $request->get('q', '');
-        $data = Neighborhood::where('city_id', $request->city_id)->
-        where('name_ar', 'like', '%' . $search . '%')
-            ->orWhere('name_en', 'like', '%' . $search . '%')
-            ->where('neighborhood_serial', $request->city_id)
-            ->paginate()->toArray();
-        array_unshift($data['data'], [
-            'id' => 'null',
-            'title' => __('root'),
-        ]);
-        return $data;
-    }
 
 
     public function editSettings()
@@ -178,6 +152,7 @@ class SettingController extends Controller
             'unreactstorytime' => 'required',
             'mobile' => 'required',
             'whatsapp' => 'required',
+            'google_map_key' => 'required',
 
 
         ];
@@ -271,6 +246,12 @@ class SettingController extends Controller
             'value_ar' => $request->get('mobile'),
             'value_en' => $request->get('mobile')
         ]);
+        $setting_google_map_key = Setting::where('key', 'google_map_key')->update([
+            'value_ar' => $request->get('google_map_key'),
+            'value_en' => $request->get('google_map_key')
+        ]);
+
+
         \Session::flash('success', trans('admin.success_update'));
 
         return redirect()->route('admin.settings.edit');
@@ -311,6 +292,7 @@ class SettingController extends Controller
 
     public function createAdds(Request $request)
     {
+        $settings = Setting::pluck('value_ar', 'key');
 
         // dd($categories->toArray());
         $index_url = route('admin.adds.index');
@@ -323,7 +305,7 @@ class SettingController extends Controller
 
         return view(
             'admin.adds.create',
-            compact('html_breadcrumbs', 'index_url', 'create_url')
+            compact('html_breadcrumbs', 'index_url', 'create_url','settings')
         );
     }
 
@@ -425,6 +407,7 @@ class SettingController extends Controller
     public function edit($id)
     {
         $add = add::find($id);
+        $settings = Setting::pluck('value_ar', 'key');
 
         // dd($categories->toArray());
         $index_url = route('admin.adds.index');
@@ -437,7 +420,7 @@ class SettingController extends Controller
 
         return view(
             'admin.adds.edit',
-            compact('html_breadcrumbs', 'index_url', 'update_url', 'add')
+            compact('html_breadcrumbs', 'index_url', 'update_url', 'add','settings')
         );
     }
 

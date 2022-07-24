@@ -333,6 +333,16 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                                <div class="form-group row">
+                                                    <label class="col-xl-3 col-lg-3 col-form-label">{{__('views.google_map_key')}}</label>
+                                                    <div class="col-lg-9 col-xl-6">
+                                                        <div class="input-group validated">
+                                                            <input  type="text" value="{{$settings['google_map_key']}}"  name="google_map_key" class="form-control" placeholder="{{__('views.google_map_key')}}">
+
+                                                            <div class="invalid-feedback">{{$errors->first('google_map_key')}}</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
 
 
                                         </div>

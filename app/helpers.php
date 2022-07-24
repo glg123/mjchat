@@ -241,6 +241,17 @@ function get_admin_menu_list()
             ),
             'children' => [],
         ],
+        [
+
+            'url' => route('admin.posts.index'),
+            'icon' => 'flaticon2-location',
+            'text' => __('views.posts'),
+            'is_active' => str_contains(
+                request()->route()->getName(),
+                'admin.posts.index'
+            ),
+            'children' => [],
+        ],
     ];
 }
 
@@ -435,4 +446,18 @@ function checkIfMobileStartCode($mobile,$country_code = null){
 function str_random($length = 16)
 {
     return Str::random($length);
+}
+
+function nearest($lat, $lng, $radius = 30)
+{
+    // Km
+    if (empty($radius)) $radius = 30;
+    $angle_radius = $radius / 111;
+    $location['min_lat'] = $lat - $angle_radius;
+    $location['max_lat'] = $lat + $angle_radius;
+    $location['min_lng'] = $lng - $angle_radius;
+    $location['max_lng'] = $lng + $angle_radius;
+
+    return (object)$location;
+
 }
