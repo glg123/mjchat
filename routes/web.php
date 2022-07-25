@@ -92,11 +92,12 @@ Route::group(['middleware' => 'SetLocalizationFrontend'], function () {
 
             Route::get('/posts', 'Admin\PostController@posts')->name('admin.posts.index');
             Route::post('/post/comment', 'Admin\PostController@postComment')->name('admin.postComment.show');
-            Route::get('/post/{id}/show', 'Admin\PostController@edit')->name('admin.posts.show');
+            Route::get('/post/{id}/show', 'Admin\PostController@show')->name('admin.posts.show');
             Route::get('/post/{id}/update', 'Admin\PostController@update')->name('admin.posts.update');
             Route::post('/post/status', 'Admin\PostController@changeStatus')->name('admin.posts.status');
             Route::post('/post/delete/{id}', 'Admin\PostController@changeStatus')->name('admin.posts.delete');
             Route::post('/post/datatable', 'Admin\PostController@datatable')->name('admin.posts.datatable');
+            Route::post('post/comment/delete', 'Admin\PostController@DeleteComment')->name('admin.delete.comment');
 
 
 
@@ -107,6 +108,25 @@ Route::group(['middleware' => 'SetLocalizationFrontend'], function () {
             Route::get('/add/{id}/edit', 'Admin\SettingController@edit')->name('admin.adds.edit');
             Route::post('/add/{id}/update', 'Admin\SettingController@Addupdate')->name('admin.adds.update');
             Route::post('/adds/datatable', 'Admin\SettingController@Addsdatatable')->name('admin.adds.datatable');
+
+
+
+            Route::get('/orders', 'Admin\OrderController@orders')->name('admin.orders.index');
+            Route::get('/order/{id}/show', 'Admin\OrderController@edit')->name('admin.orders.show');
+            Route::post('/order/{id}/update', 'Admin\OrderController@update')->name('admin.orders.update');
+            Route::post('/order/status', 'Admin\OrderController@changeStatus')->name('admin.orders.status');
+            Route::post('/order/delete/{id}', 'Admin\OrderController@changeStatus')->name('admin.orders.delete');
+            Route::post('/order/datatable', 'Admin\OrderController@datatable')->name('admin.orders.datatable');
+
+
+            Route::get('/promotionPackges', 'Admin\PromotionPackgesController@promotionPackges')->name('admin.promotionPackges.index');
+            Route::get('/promotionPackges/create', 'Admin\PromotionPackgesController@create')->name('admin.promotionPackges.create');
+            Route::post('/promotionPackge/store', 'Admin\PromotionPackgesController@store')->name('admin.promotionPackges.store');
+            Route::get('/promotionPackge/{id}/show', 'Admin\PromotionPackgesController@edit')->name('admin.promotionPackges.show');
+            Route::post('/promotionPackge/{id}/update', 'Admin\PromotionPackgesController@update')->name('admin.promotionPackges.update');
+            Route::post('/promotionPackge/status', 'Admin\PromotionPackgesController@changeStatus')->name('admin.promotionPackges.status');
+            Route::post('/promotionPackge/delete/{id}', 'Admin\PromotionPackgesController@changeStatus')->name('admin.promotionPackges.delete');
+            Route::post('/promotionPackge/datatable', 'Admin\PromotionPackgesController@datatable')->name('admin.promotionPackges.datatable');
 
 
             Route::post('/logout', 'Auth\LoginController@logout')->name('admin.logout'); // TODO

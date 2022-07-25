@@ -15,12 +15,10 @@ class PromotionPackage extends Model
     protected $fillable = [
         'title_ar',
         'title_en',
-        'title_en',
         'type',
         'description_ar',
         'description_en',
         'description_en',
-        'count_post',
         'count_views',
         'count_days',
         'price',
@@ -28,5 +26,22 @@ class PromotionPackage extends Model
         'status',
     ];
 
+    protected $appends = ['title','description'];
 
+    public function getTitleAttribute()
+    {
+
+        $lang = app()->getLocale();
+        $name = 'title_' . $lang;
+        return @$this->$name;
+
+    }
+    public function getDescriptionAttribute()
+    {
+
+        $lang = app()->getLocale();
+        $name = 'description_' . $lang;
+        return @$this->$name;
+
+    }
 }

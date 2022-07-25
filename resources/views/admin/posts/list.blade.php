@@ -38,16 +38,18 @@
                                                 </a>
                                             </li>
                                             <li class="kt-nav__item">
-                                                <a href="#" class="kt-nav__link">
+                                                <a href="{{route('admin.posts.show',$post->id)}}" class="kt-nav__link">
                                                     <i class="kt-nav__link-icon flaticon2-settings"></i>
                                                     <span class="kt-nav__link-text">{{__('views.show')}}</span>
                                                 </a>
                                             </li>
 
-                                            <li class="kt-nav__item">
-                                                <a href="#" class="kt-nav__link">
+                                            <li class="kt-nav__item flaticon2-percentage">
+
+
+                                                <a href="http://maps.google.com/maps?q={{$post->lat}},{{$post->long}}" class="kt-nav__link">
                                                     <i class="kt-nav__link-icon flaticon2-map"></i>
-                                                    <span class="kt-nav__link-text">{{__('views.location')}}</span>
+                                                    <span class="kt-nav__link-text">{{__('views.clickLocation')}}</span>
                                                 </a>
                                             </li>
 
@@ -211,6 +213,9 @@
 
                             if (response.comments[i].perant_id == null) {
                                 comment_texts += '<div  class="kt-chat__message kt-chat__message--success">\
+                                \  <span style="float: left" class="fa-align-right text-lg-right">\
+                               <button  id="deleteComment' + response.comments[i].id +'" type="button" class="deleteComment" data-id="' + response.comments[i].id + '" >حذف</button>\
+                                  </span>\
                                 <div class="kt-chat__user">\
                         <span class="kt-media kt-media--circle kt-media--sm">\
                         <img src="' + response.comments[i].user.img + '" alt="image">\
@@ -226,6 +231,9 @@
 
 
                                         comment_texts += '<div class="kt-chat__message kt-chat__message--right kt-chat__message--brand">\
+                                            \ <span style="float: left" class="fa-align-right text-lg-right">\
+                               <button  id="deleteComment' + response.comments[i].comments[y].id +'" type="button" class="deleteComment" data-id="' + response.comments[i].comments[y].id + '" >حذف</button>\
+                                  </span>\
                                             <div class="kt-chat__user">\
                         <span class="kt-media kt-media--circle kt-media--sm">\
                         <img src="assets/media/users/100_12.jpg" alt="image">\
@@ -274,13 +282,13 @@
             if (search.length >= 4) {
                 var base = '{!! route('admin.posts.index') !!}';
 
-                var url = base+'?search='+search ;
+                var url = base + '?search=' + search;
 
-                window.location.href=url;
-               // var url = '{{ route("admin.posts.index", ":search") }}';
+                window.location.href = url;
+                // var url = '{{ route("admin.posts.index", ":search") }}';
                 url = url.replace(':search', search);
 
-                window.location.href=url;
+                window.location.href = url;
                 alert(url);
                 alert(search);
                 return false;
@@ -289,5 +297,37 @@
 
 
         });
+
+        $(document).on("click", ".deleteComment", function () {
+            var id = $(this).data("id");
+            var element = $(this);
+            var url = '{{route('admin.delete.comment')}}';
+            var csrf_token = '{{csrf_token()}}';
+            $.ajax({
+                url: url,
+                type: 'POST',
+                headers: {'X-CSRF-TOKEN': csrf_token},
+                data: {comment_id: id, _token: csrf_token},
+                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                success: function (response) {
+                    if (response.status === 'success') {
+                        alert(response.msg)
+                        $('#deleteComment'+id).parent().parent().hide();
+                        console.log(element.parent().parent());
+
+                    } else {
+                        alert(response.msg)
+                    }
+
+
+                },
+                error: function () {
+                    $('#kt_chat_modal').modal('hide');
+                    alert("error");
+                }
+            });
+
+        });
+
     </script>
 @endpush

@@ -32,8 +32,46 @@ class PromotionPost extends Model
 
 
     ];
-    public function post(){
-        return $this->belongsTo(Post::class,'post_id','id');
+    protected $appends = ['promotion_package_name', 'user_name', 'post_name'];
+
+    public function post()
+    {
+        return $this->belongsTo(Post::class, 'post_id', 'id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    public function PromotionPackage()
+    {
+        return $this->belongsTo(PromotionPackage::class, 'promotion_id', 'id');
+    }
+
+    public function getPromotionPackageNameAttribute()
+    {
+
+        $lang = app()->getLocale();
+        $name = 'title_' . $lang;
+        return @$this->PromotionPackage->$name;
+
+    }
+
+    public function getUserNameAttribute()
+    {
+
+
+        return @$this->user->first_name . ' ' . @$this->user->last_name;
+
+    }
+
+    public function getPostNameAttribute()
+    {
+
+
+        return @$this->post->comment;
+
     }
 
 }

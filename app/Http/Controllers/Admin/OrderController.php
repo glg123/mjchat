@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\Admin;
 
+use App\Models\PromotionPost;
 use App\Models\Setting;
 use App\Models\User;
 use Carbon\Carbon;
@@ -12,27 +13,26 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 
 
-class UserController extends Controller
+class OrderController extends Controller
 {
 
 
-    public function users()
+    public function orders()
     {
-        $index_url = route('admin.users.datatable');
-        $edit_url = route('admin.users.show', 'id');
+        $index_url = route('admin.orders.datatable');
+        $edit_url = route('admin.orders.show', 'id');
 
 
-        $object = new User();
+        $object = new PromotionPost();
 
         $html_breadcrumbs = [
-            'title' => __('views.users'),
+            'title' => __('views.orders'),
             'subtitle' => __('views.Index'),
             'datatable' => true,
         ];
 
-
         return view(
-            'admin.users.index',
+            'admin.orders.index',
             compact(
                 'html_breadcrumbs',
 
@@ -51,7 +51,9 @@ class UserController extends Controller
 
         //  dd($request->get('query')['neighborhood_id']);
 
-        $finiceing = User::query();
+        $finiceing = PromotionPost::with('post')
+            ->with('user')
+            ->with('PromotionPackage');
 
 
         if ($request->get('offer_status')) {
@@ -90,51 +92,59 @@ class UserController extends Controller
 
     public function edit($id)
     {
-        $user = User::query()->
-        withCount('following')
-            ->withCount('flowers')
-            ->withCount('savedPosts')
-            ->withCount('groups_members')
-            ->withCount('mygroups')
-            ->withCount('blockUsers')
-            ->withCount('post_story')
-            ->withCount('comments')
-            ->withCount('posts')
-            ->withCount('stories')
-        ->with('locations')
-        ->with('flowers')
-        ->with('savedPosts')
-        ->with('groups_members')
-        ->with('mygroups')
-        ->with('blockUsers')
-        ->with('following')
-        ->with('post_story')
-        ->with('comments')
-        ->with('stories')
-        ->with('posts')
-        ->find($id);
+        $order = PromotionPost::find($id);
 
-        if (!$user) {
-            \Session::flash('error', trans('المستخدم غير موجود'));
+
+        if (!$order) {
+            \Session::flash('error', trans('الطلب غير موجود'));
             return redirect()->back();
         }
         // dd($categories->toArray());
-        $index_url = route('admin.users.index');
-        $update_url = route('admin.users.update', $id);
+        $index_url = route('admin.orders.index');
+        $update_url = route('admin.orders.update', $id);
 
         $html_breadcrumbs = [
-            'title' => __('views.users'),
+            'title' => __('views.orders'),
             'subtitle' => __('views.Edit'),
         ];
 
 
         return view(
-            'admin.users.show',
-            compact('html_breadcrumbs', 'index_url', 'update_url', 'user')
+            'admin.orders.edit',
+            compact('html_breadcrumbs', 'index_url', 'update_url', 'order')
         );
     }
 
 
+    public function update(Request $request)
+    {
+
+
+        $rules = [
+            'status' => 'required',
+            'order_id' => 'required',
+
+
+        ];
+
+        $this->validate($request, $rules);
+        $order = PromotionPost::where('id', $request->get('order_id'))->first();
+
+        if(!$order)
+        {
+            \Session::flash('error', trans('admin.not_found'));
+        }
+        if ($order) {
+            $order->status = $request->get('status');
+            $order->save();
+        }
+
+
+
+        \Session::flash('success', trans('admin.success_update'));
+
+        return redirect()->route('admin.orders.show',$request->get('order_id'));
+    } //<--- End Method
 
 
     public function destroy($id)
@@ -143,7 +153,7 @@ class UserController extends Controller
         if ($id == 1) {
             return "fail";
         }
-        $checkDelete = User::query()->where('id', $id)->delete();
+        $checkDelete = PromotionPost::query()->where('id', $id)->delete();
         if ($checkDelete)
             return "success";
 
@@ -160,18 +170,8 @@ class UserController extends Controller
         } else {
 
 
-            if ($request->event == 'active') {
-                $x = 1;
-            }
-            if ($request->event == 'not_active') {
-                $x = 2;
-            }
-            if ($request->event == 'block') {
-                $x = 3;
-            }
-
-            $user = User::query()->whereIn('id', $request->IDArray)
-                ->update(['status' => $x]);
+            $user = PromotionPost::query()->whereIn('id', $request->IDArray)
+                ->update(['status' => $request->get('event')]);
 
 
         }

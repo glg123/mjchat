@@ -120,7 +120,7 @@ class StoryController extends Controller
         $friendPost = DB::table('posts')
             ->select('posts.*')
             ->whereRaw(' deleted_at is null');
-         //   ->whereRaw('  user_id   IN ' . $array);
+        //   ->whereRaw('  user_id   IN ' . $array);
 
         $PromotionPost = Post::whereHas('PromotionPost')
             ->select('posts.*')
@@ -142,9 +142,7 @@ class StoryController extends Controller
                 $location = nearest($attitude, $longitude, $distanceL);
 
 
-
-
-                $friendPost=    $friendPost->whereRaw('  posts.lat  between ' . $location->min_lat .
+                $friendPost = $friendPost->whereRaw('  posts.lat  between ' . $location->min_lat .
                     ' and ' . $location->max_lat .
                     ' and posts.long between '
                     . $location->min_lng .
@@ -153,14 +151,14 @@ class StoryController extends Controller
                 );
 
 
-                $PromotionPost=    $PromotionPost->whereRaw('  posts.lat  between ' . $location->min_lat .
+                $PromotionPost = $PromotionPost->whereRaw('  posts.lat  between ' . $location->min_lat .
                     ' and ' . $location->max_lat .
                     ' and posts.long between '
                     . $location->min_lng .
                     ' and ' . $location->max_lng .
                     ' and posts.deleted_at is null'
                 );
-                $adds=   $adds->whereRaw('  adds.lat  between ' . $location->min_lat .
+                $adds = $adds->whereRaw('  adds.lat  between ' . $location->min_lat .
                     ' and ' . $location->max_lat .
                     ' and adds.long between '
                     . $location->min_lng .
@@ -174,15 +172,15 @@ class StoryController extends Controller
         $friendPost = $friendPost->orderByRaw(DB::Raw(' `posts`.`id` desc '))->get();
         $PromotionPost = $PromotionPost->orderByRaw(DB::Raw(' `posts`.`id` desc '))->get();
         $adds = $adds->orderByRaw(DB::Raw(' `adds`.`id` desc '))->get();
-        $friendPost=AllStoriesResource::collection($friendPost);
-        $PromotionPost=AllStoriesResource::collection($PromotionPost);
-        $adds= userAddsResource::collection($adds);
-$array=[
-    'friendStories'=>$friendPost,
-    'PromotionStories'=>$PromotionPost,
-    'adds'=>$adds,
+        $friendPost = AllStoriesResource::collection($friendPost);
+        $PromotionPost = AllStoriesResource::collection($PromotionPost);
+        $adds = userAddsResource::collection($adds);
+        $array = [
+            'friendStories' => $friendPost,
+            'PromotionStories' => $PromotionPost,
+            'adds' => $adds,
 
-];
+        ];
         return JsonResponse::success($array, __('views.Done'));
     }
 
@@ -218,6 +216,11 @@ $array=[
             ->where('user_id', $user->id)
             ->where('story_id', $request->story_id)->count();
         $story = Post::find($request->story_id);
+        if ($story) {
+            $story->views = $story->views + 1;
+            $story->save();
+        }
+
         $story['current_user'] = $user->id;
 
         $story = SingleStoryResource::collection([$story]);
@@ -609,6 +612,11 @@ $array=[
                 'post_id' => $request->story_id,
                 'type' => 2,
             ]);
+            $post = Post::find($request->get('story_id'));
+            if ($post) {
+                $post->count_likes = $post->count_likes + 1;
+                $post->save();
+            }
             sendNotfication($story->user_id, $request->story_id, __('api.Some One Like Your Post'));
 
             return JsonResponse::success([], __("views.Done"));

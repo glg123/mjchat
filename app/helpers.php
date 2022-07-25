@@ -252,6 +252,28 @@ function get_admin_menu_list()
             ),
             'children' => [],
         ],
+        [
+
+            'url' => route('admin.orders.index'),
+            'icon' => 'flaticon2-percentage',
+            'text' => __('views.orders'),
+            'is_active' => str_contains(
+                request()->route()->getName(),
+                'admin.orders.index'
+            ),
+            'children' => [],
+        ],
+        [
+
+            'url' => route('admin.promotionPackges.index'),
+            'icon' => 'flaticon2-delivery-package',
+            'text' => __('views.promotionPackges'),
+            'is_active' => str_contains(
+                request()->route()->getName(),
+                'admin.promotionPackges.index'
+            ),
+            'children' => [],
+        ],
     ];
 }
 
